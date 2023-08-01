@@ -41,7 +41,9 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public UserDto update(Long id, UserDto userDto) {
         for (User user : listUsers.values()) {
-            if (user.getEmail().equals(userDto.getEmail()) && !user.getId().equals(id)) {
+            String email = user.getEmail();
+            Long idUser = user.getId();
+            if (email.equals(userDto.getEmail()) && !idUser.equals(id)) {
                 throw new RuntimeException(String.format("Такой email  %s уже есть у другого пользователя ", userDto.getEmail()));
             }
         }
