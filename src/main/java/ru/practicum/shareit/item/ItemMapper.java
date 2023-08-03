@@ -13,9 +13,8 @@ public class ItemMapper {
                 item.getRequest() != null ? item.getRequest() : null);
     }
 
-    public static Item toItem(Long id, Long owner, ItemDto itemDto) {
-        return new Item(id,
-                itemDto.getName(),
+    public static Item toItem(Long owner, ItemDto itemDto) {
+        return new Item(itemDto.getName(),
                 itemDto.getDescription(),
                 itemDto.getAvailable(),
                 owner,

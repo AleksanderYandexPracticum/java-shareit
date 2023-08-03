@@ -8,11 +8,11 @@ public interface ItemService {
 
     ItemDto add(Long owner, ItemDto itemDto);
 
-    ItemDto get(Long id);
+    ItemDto get(Long id, Long owner);
 
     ItemDto update(Long id, Long owner, ItemDto itemDto);
 
     List<ItemDto> getAllItemtoUser(Long owner);
 
-    List<ItemDto> getAllItemWithText(String text);
+    List<ItemDto> getAllItemWithText(String text, Long owner);
 }

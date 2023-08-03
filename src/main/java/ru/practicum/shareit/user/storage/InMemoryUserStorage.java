@@ -1,71 +1,73 @@
 package ru.practicum.shareit.user.storage;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.practicum.shareit.exception.DuplicateEmailException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.user.UserMapper;
-import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
+@Slf4j
 @Component("InMemoryUserStorage")
 public class InMemoryUserStorage implements UserStorage {
 
-    private HashMap<Long, User> listUsers = new HashMap<>();
+    private Map<Long, User> listUsers = new HashMap<>();
     private static Long id = 1L;
 
-    public HashMap<Long, User> getListUsers() {
+    public Map<Long, User> getListUsers() {
         return listUsers;
     }
 
 
     @Override
-    public UserDto add(UserDto userDto) {
-        User user = UserMapper.toUser(id, userDto);
+    public User add(User user) {
+        user.setId(id);
         listUsers.put(id, user);
-        userDto.setId(id);
+        log.info("Добавлен пользователь № " + user.getId() + "  name = " + user.getName() + "  Email= " + user.getEmail());
         id++;
-        return userDto;
+        return user;
     }
 
     @Override
-    public UserDto get(Long id) {
+    public User get(Long id) {
         if (listUsers.containsKey(id)) {
-            return UserMapper.toUserDto(listUsers.get(id));
+            return listUsers.get(id);
         }
         throw new NotFoundException(String.format("Нет такого идентификатора № %s", id));
     }
 
     @Override
-    public UserDto update(Long id, UserDto userDto) {
-        for (User user : listUsers.values()) {
-            String email = user.getEmail();
-            Long idUser = user.getId();
-            if (email.equals(userDto.getEmail()) && !idUser.equals(id)) {
-                throw new RuntimeException(String.format("Такой email  %s уже есть у другого пользователя ", userDto.getEmail()));
+    public User update(Long id, User user) {
+        user.setId(id);
+        for (User oldUser : listUsers.values()) {
+            String email = oldUser.getEmail();
+            Long idUser = oldUser.getId();
+            if (email.equals(user.getEmail()) && !idUser.equals(id)) {
+                throw new DuplicateEmailException(
+                        String.format("Такой email  %s уже есть у другого пользователя № %s ", user.getEmail(), idUser));
             }
         }
-        User user = UserMapper.toUser(id, userDto);
-        user.setName(userDto.getName() == null ? listUsers.get(id).getName() : userDto.getName());
-        user.setEmail(userDto.getEmail() == null ? listUsers.get(id).getEmail() : userDto.getEmail());
+        user.setName(user.getName() == null ? listUsers.get(id).getName() : user.getName());
+        user.setEmail(user.getEmail() == null ? listUsers.get(id).getEmail() : user.getEmail());
         listUsers.put(id, user);
-        return UserMapper.toUserDto(user);
+        return user;
     }
 
     @Override
-    public UserDto delete(Long id) {
+    public void delete(Long id) {
         if (listUsers.containsKey(id)) {
-            UserDto userDto = UserMapper.toUserDto(listUsers.get(id));
             listUsers.remove(id);
-            return userDto;
+        } else {
+            throw new NotFoundException(String.format("Нет такого идентификатора № %s", id));
         }
-        throw new NotFoundException(String.format("Нет такого идентификатора № %s", id));
     }
 
     @Override
-    public List<UserDto> getAll() {
-        return listUsers.values().stream().map((user) -> UserMapper.toUserDto(user)).collect(Collectors.toList());
+    public List<User> getAll() {
+        return new ArrayList<>(listUsers.values());
     }
 }

@@ -20,6 +20,12 @@ public class ErrorHandler {
         return new ErrorResponse("Объект не найден", e.getMessage());
     }
 
+    @ExceptionHandler(DuplicateEmailException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)  //если есть дубликат Email.
+    public ErrorResponse handleThrowable(final DuplicateEmailException e) {
+        return new ErrorResponse("Есть дубликат Email", e.getMessage());
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)  //если возникло исключение.
     public ErrorResponse handleThrowable(final Throwable e) {

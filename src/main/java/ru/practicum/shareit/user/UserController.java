@@ -11,9 +11,6 @@ import ru.practicum.shareit.user.service.UserServiceImpl;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Slf4j
 @RestController
 @RequestMapping(path = "/users")
@@ -30,7 +27,6 @@ public class UserController {
     public UserDto add(HttpServletRequest request, @RequestBody UserDto userDto) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        userServiceImpl.validationUser(userDto);
         return userServiceImpl.add(userDto);
     }
 
@@ -52,7 +48,6 @@ public class UserController {
     public void delete(HttpServletRequest request, @PathVariable("userId") Long id) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-
         userServiceImpl.delete(id);
     }
 
