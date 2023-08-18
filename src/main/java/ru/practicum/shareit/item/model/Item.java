@@ -1,14 +1,34 @@
 package ru.practicum.shareit.item.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import javax.persistence.*;
+
+@Entity
 @Data
+@Table(name = "items")
+@NoArgsConstructor
 public class Item {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
+
+    @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "description", nullable = false)
     private String description; //развёрнутое описание
+
+    @Column(name = "is_available", nullable = false)
     private Boolean available;  //статус о том, доступна или нет вещь для аренды
+
+    @Column(name = "owner_id", nullable = false)
     private Long owner;  //владелец вещи
+
+    @Column(name = "request_id")
     private Long request;  //если вещь была создана по запросу другого пользователя, то в этом
     //поле будет храниться ссылка на соответствующий запрос
 
