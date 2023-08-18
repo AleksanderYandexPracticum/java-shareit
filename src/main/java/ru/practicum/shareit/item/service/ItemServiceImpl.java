@@ -2,17 +2,22 @@ package ru.practicum.shareit.item.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.dto.BookingNewNameIdDto;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemAndLastAndNextBookingDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.storage.InMemoryItemStorage;
-import ru.practicum.shareit.item.storage.ItemStorage;
-import ru.practicum.shareit.user.service.UserServiceImpl;
+import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.user.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,13 +25,15 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service("ItemServiceImpl")
 public class ItemServiceImpl implements ItemService {
-    private final InMemoryItemStorage inMemoryItemStorage;
-    private final UserServiceImpl userServiceImpl;
+    private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
 
     @Autowired
-    public ItemServiceImpl(@Qualifier("InMemoryItemStorage") ItemStorage itemStorage, UserServiceImpl userServiceImpl) {
-        this.inMemoryItemStorage = (InMemoryItemStorage) itemStorage;
-        this.userServiceImpl = userServiceImpl;
+    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository, BookingRepository bookingRepository) {
+        this.itemRepository = itemRepository;
+        this.userRepository = userRepository;
+        this.bookingRepository = bookingRepository;
     }
 
     private void validationItem(ItemDto itemDto) {
@@ -44,66 +51,130 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-
-    private void validationIdOwner(Long owner, UserServiceImpl userServiceImpl) {
-        if ((inMemoryItemStorage.getListItems().size() != 0 && !inMemoryItemStorage.getListItems().containsKey(owner)) &&
-                userServiceImpl.get(owner) == null) {
+    private void validationIdOwner(Long owner) {
+        if (userRepository.findUserById(owner) == null) {
             log.info("Нет такого идентификатора владельца");
             throw new NotFoundException(String.format("Нет такого идентификатора владельца № %s", owner));
         }
     }
 
     private void validationIdItem(Long id) {
-        for (List<Item> items : inMemoryItemStorage.getListItems().values()) {
-            boolean findItem = items.stream().anyMatch(item -> id.equals(item.getId()));
-            if (findItem) {
-                return;
-            }
+        if (itemRepository.findItemById(id) == null) {
+            log.info("Нет такого идентификатора");
+            throw new NotFoundException(String.format("Нет такого идентификатора № %s", id));
         }
-        log.info("Нет такого идентификатора");
-        throw new NotFoundException(String.format("Нет такого идентификатора № %s", id));
+    }
+
+    private void validationIdItemAndIdOwner(Long id, Long owner) {
+        if (!itemRepository.findItemById(id).getOwner().equals(owner)) {
+            log.info(String.format("У Владельца  № %s нет вещи с идентификатором  № %s", owner, id));
+            throw new NotFoundException(String.format("У Владельца  № %s нет вещи с идентификатором  № %s", owner, id));
+        }
     }
 
 
+    @Transactional
     @Override
     public ItemDto add(Long owner, ItemDto itemDto) {
-        validationIdOwner(owner, userServiceImpl);    // проверка наличия id пользователя в памяти
         validationItem(itemDto);
+        validationIdOwner(owner);    // проверка наличия id владельца в БД
         Item item = ItemMapper.toItem(owner, itemDto);
-        return ItemMapper.toItemDto(inMemoryItemStorage.add(owner, item));
+        return ItemMapper.toItemDto(itemRepository.save(item));
     }
 
+    @Transactional(readOnly = true)
     @Override
-    public ItemDto get(Long id, Long owner) {
-        validationIdOwner(owner, userServiceImpl);
+    public ItemAndLastAndNextBookingDto get(Long id, Long owner) {
+        validationIdOwner(owner);
         validationIdItem(id);
-        return ItemMapper.toItemDto(inMemoryItemStorage.get(id));
+
+        LocalDateTime time = LocalDateTime.now();
+        Item item = itemRepository.findItemByIdAndOwner(id, owner);
+        List<Booking> bookingsEnd = bookingRepository.findBookingsByItemAndEndBeforeOrderByEndDesc(item, time);
+        List<Booking> bookingsStart = bookingRepository.findBookingsByItemAndStartAfterOrderByStartAsc(item, time);
+
+
+        BookingNewNameIdDto lastBooking = null;
+        BookingNewNameIdDto nextBooking = null;
+        if (bookingsEnd != null && bookingsEnd.size() > 0) {
+            lastBooking = new BookingNewNameIdDto();
+            lastBooking.setId(bookingsEnd.get(0).getId());
+            lastBooking.setBookerId(bookingsEnd.get(0).getBooker().getId());
+        }
+        if (bookingsStart != null && bookingsStart.size() > 0) {
+            nextBooking = new BookingNewNameIdDto();
+            nextBooking.setId(bookingsStart.get(0).getId());
+            nextBooking.setBookerId(bookingsStart.get(0).getBooker().getId());
+        }
+
+        return ItemMapper.toItemAndLastAndNextBookingDto(itemRepository.getById(id), lastBooking, nextBooking);
     }
 
+    @Transactional
     @Override
     public ItemDto update(Long id, Long owner, ItemDto itemDto) {
-        validationIdOwner(owner, userServiceImpl);
+        validationIdOwner(owner);
         validationIdItem(id);
-        Item item = ItemMapper.toItem(owner, itemDto);
-        return ItemMapper.toItemDto(inMemoryItemStorage.update(id, owner, item));
+        validationIdItemAndIdOwner(id, owner);
+        Item oldItem = itemRepository.getById(id);
+        Item upItem = ItemMapper.toItem(owner, itemDto);
+
+        upItem.setId(id);
+        upItem.setName((upItem.getName() == null || upItem.getName().isBlank()) ? oldItem.getName() : upItem.getName());
+        upItem.setDescription((upItem.getDescription() == null || upItem.getName().isBlank()) ? oldItem.getDescription() : upItem.getDescription());
+        upItem.setAvailable(upItem.getAvailable() == null ? oldItem.getAvailable() : upItem.getAvailable());
+        upItem.setRequest(upItem.getRequest() == null ? oldItem.getRequest() : upItem.getRequest());
+
+        return ItemMapper.toItemDto(itemRepository.save(upItem));
     }
 
+    @Transactional(readOnly = true)
     @Override
-    public List<ItemDto> getAllItemtoUser(Long owner) {
-        validationIdOwner(owner, userServiceImpl);
-        return inMemoryItemStorage.getAllItemtoUser(owner).stream()
-                .map(item -> ItemMapper.toItemDto(item))
-                .collect(Collectors.toList());
+    public List<ItemAndLastAndNextBookingDto> getAllItemtoUser(Long owner) {
+        validationIdOwner(owner);
+        List<ItemAndLastAndNextBookingDto> listBookings = new ArrayList<>();
+
+        List<Item> items = itemRepository.findItemsByOwner(owner);
+        for (Item item : items) {
+            LocalDateTime time = LocalDateTime.now();
+            List<Booking> bookingsEnd = bookingRepository.findBookingsByItemAndEndBeforeOrderByEndDesc(item, time);
+            List<Booking> bookingsStart = bookingRepository.findBookingsByItemAndStartAfterOrderByStartAsc(item, time);
+
+            BookingNewNameIdDto lastBooking = null;
+            BookingNewNameIdDto nextBooking = null;
+            if (bookingsEnd != null && bookingsEnd.size() > 0) {
+                lastBooking = new BookingNewNameIdDto();
+                lastBooking.setId(bookingsEnd.get(0).getId());
+                lastBooking.setBookerId(bookingsEnd.get(0).getBooker().getId());
+            }
+            if (bookingsStart != null && bookingsStart.size() > 0) {
+                nextBooking = new BookingNewNameIdDto();
+                nextBooking.setId(bookingsStart.get(0).getId());
+                nextBooking.setBookerId(bookingsStart.get(0).getBooker().getId());
+            }
+            listBookings.add(ItemMapper.toItemAndLastAndNextBookingDto(item, lastBooking, nextBooking));
+
+        }
+        return listBookings;
     }
 
+    @Transactional(readOnly = true)
     @Override
-    public List<ItemDto> getAllItemWithText(String text, Long owner) {
-        validationIdOwner(owner, userServiceImpl);
-        if (text.isBlank() || text.isEmpty()) {
+    public List<ItemDto> getAllItemWithText(String text1, Long owner) {
+        validationIdOwner(owner);
+        if (text1.isBlank() || text1.isEmpty()) {
             return new ArrayList<>();
         }
-        return inMemoryItemStorage.getAllItemWithText(text).stream()
+        String text2 = text1;
+        return itemRepository
+                .findAllByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(text1, text2).stream()
                 .map(item -> ItemMapper.toItemDto(item))
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    @Override
+    public CommentDto addComment(Long owner, Long id, CommentDto commentDto) {
+        return null;
     }
 }

@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemAndLastAndNextBookingDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
@@ -39,15 +41,15 @@ public class ItemController {
         return itemServiceImpl.update(id, owner, itemDto);
     }
 
-    @GetMapping("/{itemId}")
-    public ItemDto getUser(HttpServletRequest request, @RequestHeader("X-Sharer-User-Id") Long owner, @PathVariable("itemId") Long id) {
+    @GetMapping("/{itemId}")   // Отзывы можно будет увидеть  ПЕРЕДЕЛАТЬ!!!
+    public ItemAndLastAndNextBookingDto getUser(HttpServletRequest request, @RequestHeader("X-Sharer-User-Id") Long owner, @PathVariable("itemId") Long id) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         return itemServiceImpl.get(id, owner);
     }
 
-    @GetMapping
-    public List<ItemDto> getAllItemtoUser(HttpServletRequest request, @RequestHeader("X-Sharer-User-Id") Long owner) {
+    @GetMapping   // Отзывы можно будет увидеть  ПЕРЕДЕЛАТЬ!!!
+    public List<ItemAndLastAndNextBookingDto> getAllItemtoUser(HttpServletRequest request, @RequestHeader("X-Sharer-User-Id") Long owner) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         return itemServiceImpl.getAllItemtoUser(owner);
@@ -59,6 +61,15 @@ public class ItemController {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         return itemServiceImpl.getAllItemWithText(text, owner);
+    }
+
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto add(HttpServletRequest request, @RequestHeader("X-Sharer-User-Id") Long owner, @PathVariable("itemId") Long id,
+                          @RequestBody CommentDto commentDto) {
+        log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
+                request.getMethod(), request.getRequestURI(), request.getQueryString());
+        return itemServiceImpl.addComment(owner, id, commentDto);
     }
 
 }

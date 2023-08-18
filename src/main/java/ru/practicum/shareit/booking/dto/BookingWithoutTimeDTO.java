@@ -8,16 +8,16 @@ import ru.practicum.shareit.user.model.User;
 import java.time.LocalDateTime;
 
 @Data
-public class BookingDto {
+public class BookingWithoutTimeDTO {
 
     private Long id;
-    private LocalDateTime start;   //дата и время начала бронирования
-    private LocalDateTime end;  //дата и время конца бронирования
+    private LocalDateTime start;
+    private LocalDateTime end;
     private Item item;  //вещь, которую пользователь бронирует
     private User booker;  //пользователь, который осуществляет бронирование
     private Status status;
 
-    public BookingDto(Long id, LocalDateTime start, LocalDateTime end, Item item, User booker, Status status) {
+    public BookingWithoutTimeDTO(Long id, LocalDateTime start, LocalDateTime end, Item item, User booker, Status status) {
         this.id = id;
         this.start = start;
         this.end = end;

@@ -31,4 +31,10 @@ public class ErrorHandler {
     public ErrorResponse handleThrowable(final Throwable e) {
         return new ErrorResponse("Возникло исключение", e.getMessage());
     }
+
+    @ExceptionHandler(StatusException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)  // если ошибка в статусе
+    public ErrorResponse handle(final StatusException e) {
+        return new ErrorResponse("Unknown state: UNSUPPORTED_STATUS", e.getMessage());
+    }
 }
