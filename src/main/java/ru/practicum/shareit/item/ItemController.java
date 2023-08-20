@@ -41,14 +41,14 @@ public class ItemController {
         return itemServiceImpl.update(id, owner, itemDto);
     }
 
-    @GetMapping("/{itemId}")   // Отзывы можно будет увидеть  ПЕРЕДЕЛАТЬ!!!
+    @GetMapping("/{itemId}")
     public ItemAndLastAndNextBookingDto getUser(HttpServletRequest request, @RequestHeader("X-Sharer-User-Id") Long owner, @PathVariable("itemId") Long id) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         return itemServiceImpl.get(id, owner);
     }
 
-    @GetMapping   // Отзывы можно будет увидеть  ПЕРЕДЕЛАТЬ!!!
+    @GetMapping
     public List<ItemAndLastAndNextBookingDto> getAllItemtoUser(HttpServletRequest request, @RequestHeader("X-Sharer-User-Id") Long owner) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());

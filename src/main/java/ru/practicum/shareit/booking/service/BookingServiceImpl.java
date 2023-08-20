@@ -88,8 +88,6 @@ public class BookingServiceImpl implements BookingService {
             log.info("Нет такого идентификатора владельца или автора брони");
             throw new NotFoundException(String.format("Нет такого идентификатора владельца или автора брони № %s", ownerOrBooker));
         }
-
-
     }
 
     private List<Item> validationIdOwnerHaveItem(Long owner) {
@@ -116,6 +114,7 @@ public class BookingServiceImpl implements BookingService {
             throw new ValidationException("Approved уже есть");
         }
     }
+
     private void validationSelfItem(Long owner, RequestBookingDto requestBookingDto) {     // Валидация, что вещь не принадлежит самому себе
         Item item = itemRepository.findItemById(requestBookingDto.getItemId());
         if (item.getOwner().equals(owner)) {

@@ -28,10 +28,6 @@ public class Item {
     @Column(name = "owner_id", nullable = false)
     private Long owner;  //владелец вещи
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id")
-//    private User user;
-
     @Column(name = "request_id")
     private Long request;  //если вещь была создана по запросу другого пользователя, то в этом
     //поле будет храниться ссылка на соответствующий запрос
