@@ -38,8 +38,6 @@ public class Booking {
     // REJECTED — бронирование отклонено владельцем
     // CANCELED — бронирование отменено создателем
 
-//    @Transient
-//    String name;
 
     public Booking(LocalDateTime start, LocalDateTime end, Item item, User booker, Status status) {
         this.start = start;

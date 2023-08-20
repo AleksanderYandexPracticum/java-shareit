@@ -27,36 +27,44 @@ public class ItemController {
 
 
     @PostMapping
-    public ItemDto add(HttpServletRequest request, @RequestHeader("X-Sharer-User-Id") Long owner, @RequestBody ItemDto itemDto) {
+    public ItemDto add(HttpServletRequest request,
+                       @RequestHeader("X-Sharer-User-Id") Long owner,
+                       @RequestBody ItemDto itemDto) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         return itemServiceImpl.add(owner, itemDto);
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto update(HttpServletRequest request, @RequestHeader("X-Sharer-User-Id") Long owner,
-                          @PathVariable("itemId") Long id, @RequestBody ItemDto itemDto) {
+    public ItemDto update(HttpServletRequest request,
+                          @RequestHeader("X-Sharer-User-Id") Long owner,
+                          @PathVariable("itemId") Long id,
+                          @RequestBody ItemDto itemDto) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         return itemServiceImpl.update(id, owner, itemDto);
     }
 
     @GetMapping("/{itemId}")
-    public ItemAndLastAndNextBookingDto getUser(HttpServletRequest request, @RequestHeader("X-Sharer-User-Id") Long owner, @PathVariable("itemId") Long id) {
+    public ItemAndLastAndNextBookingDto getUser(HttpServletRequest request,
+                                                @RequestHeader("X-Sharer-User-Id") Long owner,
+                                                @PathVariable("itemId") Long id) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         return itemServiceImpl.get(id, owner);
     }
 
     @GetMapping
-    public List<ItemAndLastAndNextBookingDto> getAllItemtoUser(HttpServletRequest request, @RequestHeader("X-Sharer-User-Id") Long owner) {
+    public List<ItemAndLastAndNextBookingDto> getAllItemtoUser(HttpServletRequest request,
+                                                               @RequestHeader("X-Sharer-User-Id") Long owner) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         return itemServiceImpl.getAllItemtoUser(owner);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> getAllItemWithText(HttpServletRequest request, @RequestHeader("X-Sharer-User-Id") Long owner,
+    public List<ItemDto> getAllItemWithText(HttpServletRequest request,
+                                            @RequestHeader("X-Sharer-User-Id") Long owner,
                                             @RequestParam(value = "text") String text) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
@@ -65,7 +73,9 @@ public class ItemController {
 
 
     @PostMapping("/{itemId}/comment")
-    public CommentDto add(HttpServletRequest request, @RequestHeader("X-Sharer-User-Id") Long owner, @PathVariable("itemId") Long id,
+    public CommentDto add(HttpServletRequest request,
+                          @RequestHeader("X-Sharer-User-Id") Long owner,
+                          @PathVariable("itemId") Long id,
                           @RequestBody CommentDto commentDto) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());

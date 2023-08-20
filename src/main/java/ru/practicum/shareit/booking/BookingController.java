@@ -28,22 +28,28 @@ public class BookingController {
 
 
     @PostMapping
-    public BookingDto add(HttpServletRequest request, @RequestHeader("X-Sharer-User-Id") Long owner, @RequestBody RequestBookingDto requestBookingDto) {
+    public BookingDto add(HttpServletRequest request,
+                          @RequestHeader("X-Sharer-User-Id") Long owner,
+                          @RequestBody RequestBookingDto requestBookingDto) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         return bookingServiceImpl.add(owner, requestBookingDto, LocalDateTime.now());
     }
 
     @PatchMapping("/{bookingId}")
-    public BookingDto updateStatus(HttpServletRequest request, @RequestHeader("X-Sharer-User-Id") Long owner,
-                                              @PathVariable("bookingId") Long bookingId, @RequestParam(value = "approved") Boolean approved) {
+    public BookingDto updateStatus(HttpServletRequest request,
+                                   @RequestHeader("X-Sharer-User-Id") Long owner,
+                                   @PathVariable("bookingId") Long bookingId,
+                                   @RequestParam(value = "approved") Boolean approved) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         return bookingServiceImpl.update(owner, bookingId, approved);
     }
 
     @GetMapping("/{bookingId}")
-    public BookingDto getBookingById(HttpServletRequest request, @RequestHeader("X-Sharer-User-Id") Long ownerOrBooker, @PathVariable("bookingId") Long id) {
+    public BookingDto getBookingById(HttpServletRequest request,
+                                     @RequestHeader("X-Sharer-User-Id") Long ownerOrBooker,
+                                     @PathVariable("bookingId") Long id) {
         log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         return bookingServiceImpl.getById(id, ownerOrBooker);

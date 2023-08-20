@@ -7,8 +7,6 @@ import java.util.List;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
-    List<Item> findAllByOwner(Long owner);
-
     Item save(Item item);
 
     Item getById(Long id);
@@ -19,7 +17,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     List<Item> findItemsByOwner(Long owner);
 
-    Item findItemByIdAndOwner(Long id, Long owner);
-
+    Item getItemByIdAndOwner(Long id, Long owner);
 
 }

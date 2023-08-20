@@ -4,6 +4,8 @@ import lombok.Data;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
+import java.time.LocalDateTime;
+
 
 @Data
 public class CommentCreatedStringDto {
@@ -12,10 +14,10 @@ public class CommentCreatedStringDto {
     private String text;
     private Item item;
     private User author;
-    private String created;
+    private LocalDateTime created;
     private String authorName;
 
-    public CommentCreatedStringDto(Long id, String text, Item item, User author, String created) {
+    public CommentCreatedStringDto(Long id, String text, Item item, User author, LocalDateTime created) {
         this.id = id;
         this.text = text;
         this.item = item;

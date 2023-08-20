@@ -147,7 +147,7 @@ public class BookingServiceImpl implements BookingService {
         validationApproved(bookingId);
 
         Booking booking = bookingRepository.findBookingById(bookingId);
-        booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);  /// Нужно ли добавить статус вещь занята available
+        booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
         return BookingMapper.toBookingDto(bookingRepository.save(booking));
     }
 
