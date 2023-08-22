@@ -1,18 +1,21 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.Data;
+import lombok.*;
 import ru.practicum.shareit.booking.dto.BookingNewNameIdDto;
 
 import java.util.List;
 
 
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode
+@ToString
 public class ItemAndLastAndNextBookingDto {
 
     private Long id;
     private String name;
-    private String description; //развёрнутое описание
-    private Boolean available;  //статус о том, доступна или нет вещь для аренды
+    private String description;
+    private Boolean available;
     private Long request;
     private BookingNewNameIdDto lastBooking;
     private BookingNewNameIdDto nextBooking;

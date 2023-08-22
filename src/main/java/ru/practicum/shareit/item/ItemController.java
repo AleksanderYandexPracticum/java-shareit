@@ -8,7 +8,6 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemAndLastAndNextBookingDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.item.service.ItemServiceImpl;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -18,11 +17,11 @@ import java.util.List;
 @RequestMapping("/items")
 public class ItemController {
 
-    private final ItemServiceImpl itemServiceImpl;
+    private final ItemService itemServiceImpl;
 
     @Autowired
     public ItemController(@Qualifier("ItemServiceImpl") ItemService itemService) {
-        this.itemServiceImpl = (ItemServiceImpl) itemService;
+        this.itemServiceImpl = itemService;
     }
 
 
@@ -30,9 +29,10 @@ public class ItemController {
     public ItemDto add(HttpServletRequest request,
                        @RequestHeader("X-Sharer-User-Id") Long owner,
                        @RequestBody ItemDto itemDto) {
-        log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
+        final Long OWNER_CONST = owner;
+        log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return itemServiceImpl.add(owner, itemDto);
+        return itemServiceImpl.add(OWNER_CONST, itemDto);
     }
 
     @PatchMapping("/{itemId}")
@@ -40,35 +40,39 @@ public class ItemController {
                           @RequestHeader("X-Sharer-User-Id") Long owner,
                           @PathVariable("itemId") Long id,
                           @RequestBody ItemDto itemDto) {
-        log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
+        final Long OWNER_CONST = owner;
+        log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return itemServiceImpl.update(id, owner, itemDto);
+        return itemServiceImpl.update(id, OWNER_CONST, itemDto);
     }
 
     @GetMapping("/{itemId}")
     public ItemAndLastAndNextBookingDto getUser(HttpServletRequest request,
                                                 @RequestHeader("X-Sharer-User-Id") Long owner,
                                                 @PathVariable("itemId") Long id) {
-        log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
+        final Long OWNER_CONST = owner;
+        log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return itemServiceImpl.get(id, owner);
+        return itemServiceImpl.get(id, OWNER_CONST);
     }
 
     @GetMapping
     public List<ItemAndLastAndNextBookingDto> getAllItemtoUser(HttpServletRequest request,
                                                                @RequestHeader("X-Sharer-User-Id") Long owner) {
-        log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
+        final Long OWNER_CONST = owner;
+        log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return itemServiceImpl.getAllItemtoUser(owner);
+        return itemServiceImpl.getAllItemtoUser(OWNER_CONST);
     }
 
     @GetMapping("/search")
     public List<ItemDto> getAllItemWithText(HttpServletRequest request,
                                             @RequestHeader("X-Sharer-User-Id") Long owner,
                                             @RequestParam(value = "text") String text) {
-        log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
+        final Long OWNER_CONST = owner;
+        log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return itemServiceImpl.getAllItemWithText(text, owner);
+        return itemServiceImpl.getAllItemWithText(text, OWNER_CONST);
     }
 
 
@@ -77,9 +81,10 @@ public class ItemController {
                           @RequestHeader("X-Sharer-User-Id") Long owner,
                           @PathVariable("itemId") Long id,
                           @RequestBody CommentDto commentDto) {
-        log.info("Получен запрос к эндпоинту: '{} {}', Строка параметров запроса: '{}'",
+        final Long OWNER_CONST = owner;
+        log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return itemServiceImpl.addComment(owner, id, commentDto);
+        return itemServiceImpl.addComment(OWNER_CONST, id, commentDto);
     }
 
 }

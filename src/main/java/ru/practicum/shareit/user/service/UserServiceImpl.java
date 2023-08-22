@@ -29,46 +29,46 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    private void validationUser(UserDto userDto) {
+    private void validateUser(UserDto userDto) {
         if (userDto.getName() == null || userDto.getName().isBlank()) {
-            log.info("Имя пользователя не может быть пустым");
-            throw new ValidationException("Имя пользователя не может быть пустым");
+            log.info("The user name cannot be empty");
+            throw new ValidationException("The user name cannot be empty");
         }
     }
 
-    private void validationEmail(UserDto userDto) {
+    private void validateEmail(UserDto userDto) {
         if (userDto.getEmail().isBlank() || !userDto.getEmail().contains("@")) {
-            log.info("Электронная почта не может быть пустой и должна содержать символ @");
-            throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
+            log.info("The email cannot be empty and must contain the character @");
+            throw new ValidationException("The email cannot be empty and must contain the character @");
         }
     }
 
-    private void validationEmailforUpdate(Long id, UserDto userDto) {
+    private void validateEmailforUpdate(Long id, UserDto userDto) {
         if (!userDto.getEmail().contains("@")) {
-            log.info("Электронная почта не может быть пустой и должна содержать символ @");
-            throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
+            log.info("The email cannot be empty and must contain the character @");
+            throw new ValidationException("The email cannot be empty and must contain the character @");
         }
     }
 
-    private void validationEmailNull(UserDto userDto) {
+    private void validateEmailNull(UserDto userDto) {
         if (userDto.getEmail() == null) {
-            log.info("Электронная почта не может быть null");
-            throw new ValidationException("Электронная почта не может быть null");
+            log.info("Email cannot be null");
+            throw new ValidationException("Email cannot be null");
         }
     }
 
     @Transactional
     @Override
     public UserDto add(UserDto userDto) {
-        validationUser(userDto);
-        validationEmailNull(userDto);
-        validationEmail(userDto);
+        validateUser(userDto);
+        validateEmailNull(userDto);
+        validateEmail(userDto);
         User user = UserMapper.toUser(userDto);
         try {
             userDto = UserMapper.toUserDto(userRepository.save(user));
         } catch (DataIntegrityViolationException e) {
-            log.info("Дубликат электронного адреса пользователя");
-            throw new DuplicateEmailException("Дубликат электронного адреса пользователя");
+            log.info("Duplicate of the user's email address");
+            throw new DuplicateEmailException("Duplicate of the user's email address");
         }
         return userDto;
     }
@@ -80,8 +80,8 @@ public class UserServiceImpl implements UserService {
         try {
             userDto = UserMapper.toUserDto(userRepository.getById(id));
         } catch (EntityNotFoundException e) {
-            log.info(String.format("Нет пользователя с идентификатором  № %s", id));
-            throw new NotFoundException(String.format("Нет пользователя с идентификатором  № %s", id));
+            log.info(String.format("There is no user with an ID  № %s", id));
+            throw new NotFoundException(String.format("There is no user with an ID  № %s", id));
         }
         return userDto;
     }
@@ -98,15 +98,15 @@ public class UserServiceImpl implements UserService {
         if (userDto.getEmail() == null || userDto.getEmail().isBlank()) {
             newUser.setEmail(oldUser.getEmail());
         } else {
-            validationEmailforUpdate(id, userDto);
+            validateEmailforUpdate(id, userDto);
         }
         newUser.setId(id);
 
         try {
             userDto = UserMapper.toUserDto(userRepository.save(newUser));
         } catch (DataIntegrityViolationException e) {
-            log.info("Дубликат электронного адреса пользователя");
-            throw new DuplicateEmailException("Дубликат электронного адреса пользователя");
+            log.info("Duplicate of the user's email address");
+            throw new DuplicateEmailException("Duplicate of the user's email address");
         }
         return userDto;
     }

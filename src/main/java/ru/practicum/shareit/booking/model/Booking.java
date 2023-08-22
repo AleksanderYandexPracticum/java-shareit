@@ -1,7 +1,6 @@
 package ru.practicum.shareit.booking.model;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -9,7 +8,10 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode
+@ToString
 @Table(name = "bookings")
 @NoArgsConstructor
 public class Booking {
@@ -18,26 +20,21 @@ public class Booking {
     private Long id;
 
     @Column(name = "start_date", nullable = false)
-    private LocalDateTime start;   //дата и время начала бронирования
+    private LocalDateTime start;
 
     @Column(name = "end_date", nullable = false)
-    private LocalDateTime end;  //дата и время конца бронирования
+    private LocalDateTime end;
 
     @ManyToOne
     @JoinColumn(name = "item_id")
-    private Item item;  //вещь, которую пользователь бронирует
+    private Item item;
 
     @ManyToOne
     @JoinColumn(name = "booker_id")
-    private User booker;  //пользователь, который осуществляет бронирование
+    private User booker;
 
     @Enumerated(EnumType.STRING)
-    private Status status;  //статус бронирования
-    // WAITING — новое бронирование, ожидает одобрения
-    // APPROVED — бронирование подтверждено владельцем
-    // REJECTED — бронирование отклонено владельцем
-    // CANCELED — бронирование отменено создателем
-
+    private Status status;
 
     public Booking(LocalDateTime start, LocalDateTime end, Item item, User booker, Status status) {
         this.start = start;

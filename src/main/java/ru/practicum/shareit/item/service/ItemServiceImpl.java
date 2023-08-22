@@ -45,67 +45,65 @@ public class ItemServiceImpl implements ItemService {
         this.commentRepository = commentRepository;
     }
 
-    private void validationItem(ItemDto itemDto) {
+    private void validateItem(ItemDto itemDto) {
         if (itemDto.getName() == null || itemDto.getName().isBlank()) {
-            log.info("Название вещи не может быть пустым");
-            throw new ValidationException("Название вещи не может быть пустым");
-        }
-        if (itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
-            log.info("Описание не может быть пустым");
-            throw new ValidationException("Описание не может быть пустым");
-        }
-        if (itemDto.getAvailable() == null) {
-            log.info("Статус аренды не может быть пустым");
-            throw new ValidationException("Статус аренды не может быть пустым");
+            log.info("The name of the item cannot be empty");
+            throw new ValidationException("The name of the item cannot be empty");
+        } else if (itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
+            log.info("The description cannot be empty");
+            throw new ValidationException("The description cannot be empty");
+        } else if (itemDto.getAvailable() == null) {
+            log.info("The rental status cannot be empty");
+            throw new ValidationException("The rental status cannot be empty");
         }
     }
 
-    private void validationIdOwner(Long owner) {
-        if (userRepository.findUserById(owner) == null) {
-            log.info("Нет такого идентификатора владельца");
-            throw new NotFoundException(String.format("Нет такого идентификатора владельца № %s", owner));
+    private void validateIdOwner(Long owner) {
+        if (!userRepository.existsById(owner)) {
+            log.info("There is no such owner ID");
+            throw new NotFoundException(String.format("There is no such owner ID № %s", owner));
         }
     }
 
-    private void validationIdItem(Long id) {
-        if (itemRepository.findItemById(id) == null) {
-            log.info("Нет такого идентификатора");
-            throw new NotFoundException(String.format("Нет такого идентификатора № %s", id));
+    private void validateIdItem(Long id) {
+        if (!itemRepository.existsById(id)) {
+            log.info("There is no such identifier");
+            throw new NotFoundException(String.format("There is no such identifier № %s", id));
         }
     }
 
-    private void validationIdItemAndIdOwner(Long id, Long owner) {
+    private void validateIdItemAndIdOwner(Long id, Long owner) {
         if (!itemRepository.findItemById(id).getOwner().equals(owner)) {
-            log.info(String.format("У Владельца  № %s нет вещи с идентификатором  № %s", owner, id));
-            throw new NotFoundException(String.format("У Владельца  № %s нет вещи с идентификатором  № %s", owner, id));
+            log.info(String.format("Owner  № %s doesn't have an item with an ID  № %s", owner, id));
+            throw new NotFoundException(String.format("Owner  № %s doesn't have an item with an ID  № %s", owner, id));
         }
     }
 
-    private void validationIdOwnerHaveBookingItem(Long owner, Long id) {
+    private void validateIdOwnerHaveBookingItem(Long owner, Long id) {
         LocalDateTime time = LocalDateTime.now();
         List<Status> status = Arrays.asList(Status.REJECTED, Status.CANCELED, Status.WAITING, Status.FUTURE);
         if (bookingRepository.findAllBookingByItemIdAndBookerIdAndStatusNotIn(id, owner, status).size() == 0
                 || bookingRepository.findBookingByItemIdAndBookerIdAndEndBefore(id, owner, time).size() == 0) {
-            log.info("Отзыв может оставить только тот пользователь, " +
-                    "который брал эту вещь в аренду, и только после окончания срока аренды");
-            throw new ValidationException(String.format("Отзыв может оставить только тот пользователь, " +
-                    "который брал эту вещь в аренду, и только после окончания срока аренды " +
-                    "Владелец  № %s  вещь с идентификатором  № %s", owner, id));
+            log.info("Only that user can leave a review, " +
+                    "who rented this thing, and only after the end of the lease period");
+            throw new ValidationException(String.format("Only that user can leave a review, " +
+                    "who rented this thing, and only after the end of the lease period " +
+                    "Owner  № %s  the thing with the ID  № %s", owner, id));
         }
     }
 
-    private void validationComment(CommentDto commentDto) {
+    private void validateComment(CommentDto commentDto) {
         if (commentDto.getText() == null || commentDto.getText().isBlank()) {
-            log.info("Комментарий не может быть пустым");
-            throw new ValidationException("Комментарий не может быть пустым");
+            log.info("The comment cannot be empty");
+            throw new ValidationException("The comment cannot be empty");
         }
     }
 
     @Transactional
     @Override
     public ItemDto add(Long owner, ItemDto itemDto) {
-        validationItem(itemDto);
-        validationIdOwner(owner);    // проверка наличия id владельца в БД
+        validateItem(itemDto);
+        validateIdOwner(owner);
         Item item = ItemMapper.toItem(owner, itemDto);
         return ItemMapper.toItemDto(itemRepository.save(item));
     }
@@ -113,8 +111,8 @@ public class ItemServiceImpl implements ItemService {
     @Transactional()
     @Override
     public ItemAndLastAndNextBookingDto get(Long id, Long owner) {
-        validationIdOwner(owner);
-        validationIdItem(id);
+        validateIdOwner(owner);
+        validateIdItem(id);
 
         LocalDateTime time = LocalDateTime.now();
         BookingNewNameIdDto lastBooking = null;
@@ -158,9 +156,9 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     @Override
     public ItemDto update(Long id, Long owner, ItemDto itemDto) {
-        validationIdOwner(owner);
-        validationIdItem(id);
-        validationIdItemAndIdOwner(id, owner);
+        validateIdOwner(owner);
+        validateIdItem(id);
+        validateIdItemAndIdOwner(id, owner);
         Item oldItem = itemRepository.getById(id);
         Item upItem = ItemMapper.toItem(owner, itemDto);
 
@@ -176,7 +174,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional()
     @Override
     public List<ItemAndLastAndNextBookingDto> getAllItemtoUser(Long owner) {
-        validationIdOwner(owner);
+        validateIdOwner(owner);
         List<ItemAndLastAndNextBookingDto> listBookings = new ArrayList<>();
         List<CommentCreatedStringDto> commentsCreatedStringDto = new ArrayList<>();
 
@@ -219,7 +217,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional(readOnly = true)
     @Override
     public List<ItemDto> getAllItemWithText(String text1, Long owner) {
-        validationIdOwner(owner);
+        validateIdOwner(owner);
         if (text1.isBlank() || text1.isEmpty()) {
             return new ArrayList<>();
         }
@@ -233,10 +231,10 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     @Override
     public CommentDto addComment(Long owner, Long id, CommentDto commentDto) {
-        validationIdOwner(owner);
-        validationIdItem(id);
-        validationIdOwnerHaveBookingItem(owner, id);
-        validationComment(commentDto);
+        validateIdOwner(owner);
+        validateIdItem(id);
+        validateIdOwnerHaveBookingItem(owner, id);
+        validateComment(commentDto);
 
         commentDto.setAuthor(userRepository.findUserById(owner));
         commentDto.setItem(itemRepository.findItemById(id));
