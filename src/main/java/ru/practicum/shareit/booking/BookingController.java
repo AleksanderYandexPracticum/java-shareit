@@ -51,10 +51,10 @@ public class BookingController {
     public BookingDto getBookingById(HttpServletRequest request,
                                      @RequestHeader("X-Sharer-User-Id") Long ownerOrBooker,
                                      @PathVariable("bookingId") Long id) {
-        final Long OWNER_BOOKER = ownerOrBooker;
+        final Long OWNERBOOKER = ownerOrBooker;
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return bookingServiceImpl.getById(id, OWNER_BOOKER);
+        return bookingServiceImpl.getById(id, OWNERBOOKER);
     }
 
     @GetMapping
