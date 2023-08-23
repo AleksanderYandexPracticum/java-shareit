@@ -1,12 +1,13 @@
 package ru.practicum.shareit.booking.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @AllArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode
-@ToString
 @NoArgsConstructor
 public class BookingNewNameIdDto {
     private Long id;

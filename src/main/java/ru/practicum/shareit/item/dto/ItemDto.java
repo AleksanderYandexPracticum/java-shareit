@@ -1,12 +1,14 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 @AllArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode
-@ToString
+@Builder
 public class ItemDto {
 
     private Long id;

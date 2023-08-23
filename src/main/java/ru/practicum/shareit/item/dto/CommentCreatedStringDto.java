@@ -1,16 +1,16 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 
-
 @Getter
 @Setter
-@EqualsAndHashCode
-@ToString
+@Builder
 public class CommentCreatedStringDto {
 
     private Long id;
@@ -19,12 +19,4 @@ public class CommentCreatedStringDto {
     private User author;
     private LocalDateTime created;
     private String authorName;
-
-    public CommentCreatedStringDto(Long id, String text, Item item, User author, LocalDateTime created) {
-        this.id = id;
-        this.text = text;
-        this.item = item;
-        this.author = author;
-        this.created = created;
-    }
 }

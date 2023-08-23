@@ -1,14 +1,14 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode
-@ToString
 public class ItemWithTimeDto {
 
     private Long id;

@@ -6,26 +6,31 @@ import ru.practicum.shareit.item.model.Comment;
 
 public class CommentMapper {
     public static CommentDto toCommentDto(Comment comment) {
-        return new CommentDto(comment.getId(),
-                comment.getText(),
-                comment.getItem(),
-                comment.getAuthor(),
-                comment.getCreated());
+        return CommentDto.builder()
+                .id(comment.getId())
+                .text(comment.getText())
+                .item(comment.getItem())
+                .author(comment.getAuthor())
+                .created(comment.getCreated())
+                .build();
     }
 
     public static CommentCreatedStringDto toCommentCreatedStringDto(Comment comment) {
-        return new CommentCreatedStringDto(comment.getId(),
-                comment.getText(),
-                comment.getItem(),
-                comment.getAuthor(),
-                comment.getCreated());
+        return CommentCreatedStringDto.builder()
+                .id(comment.getId())
+                .text(comment.getText())
+                .item(comment.getItem())
+                .author(comment.getAuthor())
+                .created(comment.getCreated())
+                .build();
     }
 
-
     public static Comment toComment(CommentDto commentDto) {
-        return new Comment(commentDto.getText(),
-                commentDto.getItem(),
-                commentDto.getAuthor(),
-                commentDto.getCreated());
+        return Comment.builder()
+                .text(commentDto.getText())
+                .item(commentDto.getItem())
+                .author(commentDto.getAuthor())
+                .created(commentDto.getCreated())
+                .build();
     }
 }

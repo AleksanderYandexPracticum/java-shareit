@@ -3,7 +3,14 @@ package ru.practicum.shareit.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -15,45 +22,45 @@ import java.util.List;
 @RequestMapping(path = "/users")
 public class UserController {
 
-    private final UserService userServiceImpl;
+    private final UserService userService;
 
     @Autowired
     public UserController(@Qualifier("UserServiceImpl") UserService userService) {
-        this.userServiceImpl = userService;
+        this.userService = userService;
     }
 
     @PostMapping
     public UserDto add(HttpServletRequest request, @RequestBody UserDto userDto) {
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return userServiceImpl.add(userDto);
+        return userService.add(userDto);
     }
 
     @PatchMapping("/{userId}")
     public UserDto update(HttpServletRequest request, @PathVariable("userId") Long id, @RequestBody UserDto userDto) {
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return userServiceImpl.update(id, userDto);
+        return userService.update(id, userDto);
     }
 
     @GetMapping("/{userId}")
     public UserDto get(HttpServletRequest request, @PathVariable("userId") Long id) {
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return userServiceImpl.get(id);
+        return userService.get(id);
     }
 
     @DeleteMapping("/{userId}")
     public void delete(HttpServletRequest request, @PathVariable("userId") Long id) {
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        userServiceImpl.delete(id);
+        userService.delete(id);
     }
 
     @GetMapping()
     public List<UserDto> getAll(HttpServletRequest request) {
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return userServiceImpl.getAll();
+        return userService.getAll();
     }
 }

@@ -1,15 +1,15 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 import ru.practicum.shareit.booking.dto.BookingNewNameIdDto;
 
 import java.util.List;
 
-
 @Getter
 @Setter
-@EqualsAndHashCode
-@ToString
+@Builder
 public class ItemAndLastAndNextBookingDto {
 
     private Long id;
@@ -20,16 +20,4 @@ public class ItemAndLastAndNextBookingDto {
     private BookingNewNameIdDto lastBooking;
     private BookingNewNameIdDto nextBooking;
     private List<CommentCreatedStringDto> comments;
-
-    public ItemAndLastAndNextBookingDto(Long id, String name, String description, Boolean available,
-                                        BookingNewNameIdDto lastBooking, BookingNewNameIdDto nextBooking,
-                                        List<CommentCreatedStringDto> comments) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.available = available;
-        this.lastBooking = lastBooking;
-        this.nextBooking = nextBooking;
-        this.comments = comments;
-    }
 }

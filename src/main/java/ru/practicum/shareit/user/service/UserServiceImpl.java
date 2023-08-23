@@ -29,34 +29,6 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    private void validateUser(UserDto userDto) {
-        if (userDto.getName() == null || userDto.getName().isBlank()) {
-            log.info("The user name cannot be empty");
-            throw new ValidationException("The user name cannot be empty");
-        }
-    }
-
-    private void validateEmail(UserDto userDto) {
-        if (userDto.getEmail().isBlank() || !userDto.getEmail().contains("@")) {
-            log.info("The email cannot be empty and must contain the character @");
-            throw new ValidationException("The email cannot be empty and must contain the character @");
-        }
-    }
-
-    private void validateEmailforUpdate(Long id, UserDto userDto) {
-        if (!userDto.getEmail().contains("@")) {
-            log.info("The email cannot be empty and must contain the character @");
-            throw new ValidationException("The email cannot be empty and must contain the character @");
-        }
-    }
-
-    private void validateEmailNull(UserDto userDto) {
-        if (userDto.getEmail() == null) {
-            log.info("Email cannot be null");
-            throw new ValidationException("Email cannot be null");
-        }
-    }
-
     @Transactional
     @Override
     public UserDto add(UserDto userDto) {
@@ -76,14 +48,12 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     @Override
     public UserDto get(Long id) {
-        UserDto userDto;
         try {
-            userDto = UserMapper.toUserDto(userRepository.getById(id));
+            return UserMapper.toUserDto(userRepository.getById(id));
         } catch (EntityNotFoundException e) {
             log.info(String.format("There is no user with an ID  № %s", id));
             throw new NotFoundException(String.format("There is no user with an ID  № %s", id));
         }
-        return userDto;
     }
 
     @Transactional
@@ -98,7 +68,7 @@ public class UserServiceImpl implements UserService {
         if (userDto.getEmail() == null || userDto.getEmail().isBlank()) {
             newUser.setEmail(oldUser.getEmail());
         } else {
-            validateEmailforUpdate(id, userDto);
+            validateEmailForUpdate(id, userDto);
         }
         newUser.setId(id);
 
@@ -123,5 +93,33 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll().stream()
                 .map((user) -> UserMapper.toUserDto(user))
                 .collect(Collectors.toList());
+    }
+
+    private void validateUser(UserDto userDto) {
+        if (userDto.getName() == null || userDto.getName().isBlank()) {
+            log.info("The user name cannot be empty");
+            throw new ValidationException("The user name cannot be empty");
+        }
+    }
+
+    private void validateEmail(UserDto userDto) {
+        if (userDto.getEmail().isBlank() || !userDto.getEmail().contains("@")) {
+            log.info("The email cannot be empty and must contain the character @");
+            throw new ValidationException("The email cannot be empty and must contain the character @");
+        }
+    }
+
+    private void validateEmailForUpdate(Long id, UserDto userDto) {
+        if (!userDto.getEmail().contains("@")) {
+            log.info("The email cannot be empty and must contain the character @");
+            throw new ValidationException("The email cannot be empty and must contain the character @");
+        }
+    }
+
+    private void validateEmailNull(UserDto userDto) {
+        if (userDto.getEmail() == null) {
+            log.info("Email cannot be null");
+            throw new ValidationException("Email cannot be null");
+        }
     }
 }

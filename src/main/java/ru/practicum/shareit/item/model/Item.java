@@ -1,8 +1,19 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
 @Getter
@@ -11,6 +22,8 @@ import javax.persistence.*;
 @ToString
 @Table(name = "items")
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Item {
 
     @Id
@@ -31,12 +44,5 @@ public class Item {
 
     @Column(name = "request_id")
     private Long request;
-
-    public Item(String name, String description, Boolean available, Long owner, Long request) {
-        this.name = name;
-        this.description = description;
-        this.available = available;
-        this.owner = owner;
-        this.request = request;
-    }
 }
+

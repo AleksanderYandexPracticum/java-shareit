@@ -1,11 +1,14 @@
 package ru.practicum.shareit.item.service;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingNewNameIdDto;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.QBooking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -28,6 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 @Slf4j
 @Service("ItemServiceImpl")
 public class ItemServiceImpl implements ItemService {
@@ -43,60 +47,6 @@ public class ItemServiceImpl implements ItemService {
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
-    }
-
-    private void validateItem(ItemDto itemDto) {
-        if (itemDto.getName() == null || itemDto.getName().isBlank()) {
-            log.info("The name of the item cannot be empty");
-            throw new ValidationException("The name of the item cannot be empty");
-        } else if (itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
-            log.info("The description cannot be empty");
-            throw new ValidationException("The description cannot be empty");
-        } else if (itemDto.getAvailable() == null) {
-            log.info("The rental status cannot be empty");
-            throw new ValidationException("The rental status cannot be empty");
-        }
-    }
-
-    private void validateIdOwner(Long owner) {
-        if (!userRepository.existsById(owner)) {
-            log.info("There is no such owner ID");
-            throw new NotFoundException(String.format("There is no such owner ID № %s", owner));
-        }
-    }
-
-    private void validateIdItem(Long id) {
-        if (!itemRepository.existsById(id)) {
-            log.info("There is no such identifier");
-            throw new NotFoundException(String.format("There is no such identifier № %s", id));
-        }
-    }
-
-    private void validateIdItemAndIdOwner(Long id, Long owner) {
-        if (!itemRepository.findItemById(id).getOwner().equals(owner)) {
-            log.info(String.format("Owner  № %s doesn't have an item with an ID  № %s", owner, id));
-            throw new NotFoundException(String.format("Owner  № %s doesn't have an item with an ID  № %s", owner, id));
-        }
-    }
-
-    private void validateIdOwnerHaveBookingItem(Long owner, Long id) {
-        LocalDateTime time = LocalDateTime.now();
-        List<Status> status = Arrays.asList(Status.REJECTED, Status.CANCELED, Status.WAITING, Status.FUTURE);
-        if (bookingRepository.findAllBookingByItemIdAndBookerIdAndStatusNotIn(id, owner, status).size() == 0
-                || bookingRepository.findBookingByItemIdAndBookerIdAndEndBefore(id, owner, time).size() == 0) {
-            log.info("Only that user can leave a review, " +
-                    "who rented this thing, and only after the end of the lease period");
-            throw new ValidationException(String.format("Only that user can leave a review, " +
-                    "who rented this thing, and only after the end of the lease period " +
-                    "Owner  № %s  the thing with the ID  № %s", owner, id));
-        }
-    }
-
-    private void validateComment(CommentDto commentDto) {
-        if (commentDto.getText() == null || commentDto.getText().isBlank()) {
-            log.info("The comment cannot be empty");
-            throw new ValidationException("The comment cannot be empty");
-        }
     }
 
     @Transactional
@@ -119,8 +69,15 @@ public class ItemServiceImpl implements ItemService {
         BookingNewNameIdDto nextBooking = null;
 
         Item item = itemRepository.getItemByIdAndOwner(id, owner);
-        if (item != null) {  //Это если не владелец вещи
-            List<Booking> bookingsEnd = bookingRepository.findBookingsByItemAndStartBeforeAndEndAfterOrItemAndEndBeforeOrderByEndDesc(item, time, time, item, time);
+        if (item != null) {
+
+            BooleanExpression byItem = QBooking.booking.item.eq(item);
+            BooleanExpression startBefore = QBooking.booking.start.before(time);
+            BooleanExpression endAfter = QBooking.booking.end.after(time);
+            BooleanExpression endBefore = QBooking.booking.end.before(time);
+            Sort sort = Sort.by(Sort.Direction.DESC, "end");
+
+            List<Booking> bookingsEnd = (List<Booking>) bookingRepository.findAll(byItem.and(startBefore).and(endAfter).or(byItem.and(endBefore)), sort);
 
             List<Status> status = Arrays.asList(Status.APPROVED, Status.CURRENT, Status.PAST);
             List<Booking> bookingsStart = bookingRepository.findBookingsByItemAndStatusInAndStartAfterOrderByStartAsc(item, status, time);
@@ -247,5 +204,59 @@ public class ItemServiceImpl implements ItemService {
         commentDto.setAuthorName(commentDto.getAuthor().getName());
 
         return commentDto;
+    }
+
+    private void validateItem(ItemDto itemDto) {
+        if (itemDto.getName() == null || itemDto.getName().isBlank()) {
+            log.info("The name of the item cannot be empty");
+            throw new ValidationException("The name of the item cannot be empty");
+        } else if (itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
+            log.info("The description cannot be empty");
+            throw new ValidationException("The description cannot be empty");
+        } else if (itemDto.getAvailable() == null) {
+            log.info("The rental status cannot be empty");
+            throw new ValidationException("The rental status cannot be empty");
+        }
+    }
+
+    private void validateIdOwner(Long owner) {
+        if (!userRepository.existsById(owner)) {
+            log.info("There is no such owner ID");
+            throw new NotFoundException(String.format("There is no such owner ID № %s", owner));
+        }
+    }
+
+    private void validateIdItem(Long id) {
+        if (!itemRepository.existsById(id)) {
+            log.info("There is no such identifier");
+            throw new NotFoundException(String.format("There is no such identifier № %s", id));
+        }
+    }
+
+    private void validateIdItemAndIdOwner(Long id, Long owner) {
+        if (!itemRepository.findItemById(id).getOwner().equals(owner)) {
+            log.info(String.format("Owner  № %s doesn't have an item with an ID  № %s", owner, id));
+            throw new NotFoundException(String.format("Owner  № %s doesn't have an item with an ID  № %s", owner, id));
+        }
+    }
+
+    private void validateIdOwnerHaveBookingItem(Long owner, Long id) {
+        LocalDateTime time = LocalDateTime.now();
+        List<Status> status = Arrays.asList(Status.REJECTED, Status.CANCELED, Status.WAITING, Status.FUTURE);
+        if (bookingRepository.findAllBookingByItemIdAndBookerIdAndStatusNotIn(id, owner, status).size() == 0
+                || bookingRepository.findBookingByItemIdAndBookerIdAndEndBefore(id, owner, time).size() == 0) {
+            log.info("Only that user can leave a review, " +
+                    "who rented this thing, and only after the end of the lease period");
+            throw new ValidationException(String.format("Only that user can leave a review, " +
+                    "who rented this thing, and only after the end of the lease period " +
+                    "Owner  № %s  the thing with the ID  № %s", owner, id));
+        }
+    }
+
+    private void validateComment(CommentDto commentDto) {
+        if (commentDto.getText() == null || commentDto.getText().isBlank()) {
+            log.info("The comment cannot be empty");
+            throw new ValidationException("The comment cannot be empty");
+        }
     }
 }

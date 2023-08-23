@@ -3,7 +3,15 @@ package ru.practicum.shareit.item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemAndLastAndNextBookingDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -16,75 +24,70 @@ import java.util.List;
 @RestController
 @RequestMapping("/items")
 public class ItemController {
+    private static final String X_SHARER_USER_ID = "X-Sharer-User-Id";
 
-    private final ItemService itemServiceImpl;
+    private final ItemService itemService;
 
     @Autowired
     public ItemController(@Qualifier("ItemServiceImpl") ItemService itemService) {
-        this.itemServiceImpl = itemService;
+        this.itemService = itemService;
     }
 
 
     @PostMapping
     public ItemDto add(HttpServletRequest request,
-                       @RequestHeader("X-Sharer-User-Id") Long owner,
+                       @RequestHeader(X_SHARER_USER_ID) Long owner,
                        @RequestBody ItemDto itemDto) {
-        final Long OWNER_CONST = owner;
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return itemServiceImpl.add(OWNER_CONST, itemDto);
+        return itemService.add(owner, itemDto);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto update(HttpServletRequest request,
-                          @RequestHeader("X-Sharer-User-Id") Long owner,
+                          @RequestHeader(X_SHARER_USER_ID) Long owner,
                           @PathVariable("itemId") Long id,
                           @RequestBody ItemDto itemDto) {
-        final Long OWNER_CONST = owner;
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return itemServiceImpl.update(id, OWNER_CONST, itemDto);
+        return itemService.update(id, owner, itemDto);
     }
 
     @GetMapping("/{itemId}")
     public ItemAndLastAndNextBookingDto getUser(HttpServletRequest request,
-                                                @RequestHeader("X-Sharer-User-Id") Long owner,
+                                                @RequestHeader(X_SHARER_USER_ID) Long owner,
                                                 @PathVariable("itemId") Long id) {
-        final Long OWNER_CONST = owner;
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return itemServiceImpl.get(id, OWNER_CONST);
+        return itemService.get(id, owner);
     }
 
     @GetMapping
     public List<ItemAndLastAndNextBookingDto> getAllItemtoUser(HttpServletRequest request,
-                                                               @RequestHeader("X-Sharer-User-Id") Long owner) {
-        final Long OWNER_CONST = owner;
+                                                               @RequestHeader(X_SHARER_USER_ID) Long owner) {
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return itemServiceImpl.getAllItemtoUser(OWNER_CONST);
+        return itemService.getAllItemtoUser(owner);
     }
 
     @GetMapping("/search")
     public List<ItemDto> getAllItemWithText(HttpServletRequest request,
-                                            @RequestHeader("X-Sharer-User-Id") Long owner,
+                                            @RequestHeader(X_SHARER_USER_ID) Long owner,
                                             @RequestParam(value = "text") String text) {
-        final Long OWNER_CONST = owner;
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return itemServiceImpl.getAllItemWithText(text, OWNER_CONST);
+        return itemService.getAllItemWithText(text, owner);
     }
 
 
     @PostMapping("/{itemId}/comment")
     public CommentDto add(HttpServletRequest request,
-                          @RequestHeader("X-Sharer-User-Id") Long owner,
+                          @RequestHeader(X_SHARER_USER_ID) Long owner,
                           @PathVariable("itemId") Long id,
                           @RequestBody CommentDto commentDto) {
-        final Long OWNER_CONST = owner;
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return itemServiceImpl.addComment(OWNER_CONST, id, commentDto);
+        return itemService.addComment(owner, id, commentDto);
     }
 
 }

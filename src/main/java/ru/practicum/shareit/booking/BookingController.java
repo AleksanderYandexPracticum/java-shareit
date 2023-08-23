@@ -2,7 +2,15 @@ package ru.practicum.shareit.booking;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.RequestBookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
@@ -17,63 +25,59 @@ import java.util.Optional;
 @RestController
 @RequestMapping(path = "/bookings")
 public class BookingController {
+    private static final String X_SHARER_USER_ID = "X-Sharer-User-Id";
 
-    private final BookingService bookingServiceImpl;
+    private final BookingService bookingService;
 
     @Autowired
     public BookingController(BookingService bookingService) {
-        this.bookingServiceImpl = bookingService;
+        this.bookingService = bookingService;
     }
 
 
     @PostMapping
     public BookingDto add(HttpServletRequest request,
-                          @RequestHeader("X-Sharer-User-Id") Long owner,
+                          @RequestHeader(X_SHARER_USER_ID) Long owner,
                           @RequestBody RequestBookingDto requestBookingDto) {
-        final Long OWNER_CONST = owner;
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return bookingServiceImpl.add(OWNER_CONST, requestBookingDto, LocalDateTime.now());
+        return bookingService.add(owner, requestBookingDto, LocalDateTime.now());
     }
 
     @PatchMapping("/{bookingId}")
     public BookingDto updateStatus(HttpServletRequest request,
-                                   @RequestHeader("X-Sharer-User-Id") Long owner,
-                                   @PathVariable("bookingId") Long bookingId,
+                                   @RequestHeader(X_SHARER_USER_ID) Long owner,
+                                   @PathVariable Long bookingId,
                                    @RequestParam(value = "approved") Boolean approved) {
-        final Long OWNER_CONST = owner;
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return bookingServiceImpl.update(OWNER_CONST, bookingId, approved);
+        return bookingService.update(owner, bookingId, approved);
     }
 
     @GetMapping("/{bookingId}")
     public BookingDto getBookingById(HttpServletRequest request,
-                                     @RequestHeader("X-Sharer-User-Id") Long ownerOrBooker,
+                                     @RequestHeader(X_SHARER_USER_ID) Long ownerOrBooker,
                                      @PathVariable("bookingId") Long id) {
-        final Long OWNERBOOKER = ownerOrBooker;
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return bookingServiceImpl.getById(id, OWNERBOOKER);
+        return bookingService.getById(id, ownerOrBooker);
     }
 
     @GetMapping
     public List<BookingDto> getAllBookingsByUserId(HttpServletRequest request,
-                                                   @RequestHeader("X-Sharer-User-Id") Long owner,
+                                                   @RequestHeader(X_SHARER_USER_ID) Long owner,
                                                    @RequestParam(value = "state") Optional<String> state) {
-        final Long OWNER_CONST = owner;
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return bookingServiceImpl.getAllBookingsByUserId(OWNER_CONST, state.orElseGet(() -> "ALL"));
+        return bookingService.getAllBookingsByUserId(owner, state.orElseGet(() -> "ALL"));
     }
 
     @GetMapping("/owner")
     public List<BookingDto> getAllBookingsAllItemsByUserId(HttpServletRequest request,
-                                                           @RequestHeader("X-Sharer-User-Id") Long owner,
+                                                           @RequestHeader(X_SHARER_USER_ID) Long owner,
                                                            @RequestParam(value = "state") Optional<String> state) {
-        final Long OWNER_CONST = owner;
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return bookingServiceImpl.getAllBookingsAllItemsByUserId(OWNER_CONST, state.orElseGet(() -> "ALL"));
+        return bookingService.getAllBookingsAllItemsByUserId(owner, state.orElseGet(() -> "ALL"));
     }
 }
