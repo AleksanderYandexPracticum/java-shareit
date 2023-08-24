@@ -2,97 +2,124 @@ package ru.practicum.shareit.user.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.DuplicateEmailException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.storage.InMemoryItemStorage;
-import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.storage.InMemoryUserStorage;
-import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.user.repository.UserRepository;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 
 @Slf4j
-@Service("UserServiceImpl")
+@Service
 public class UserServiceImpl implements UserService {
-    private final InMemoryUserStorage inMemoryUserStorage;
-    private final InMemoryItemStorage inMemoryItemStorage;
+    private final UserRepository userRepository;
 
     @Autowired
-    public UserServiceImpl(@Qualifier("InMemoryUserStorage") UserStorage userStorage,
-                           @Qualifier("InMemoryItemStorage") ItemStorage itemStorage) {
-        this.inMemoryUserStorage = (InMemoryUserStorage) userStorage;
-        this.inMemoryItemStorage = (InMemoryItemStorage) itemStorage;
+    public UserServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
-    public InMemoryUserStorage getInMemoryUserStorage() {
-        return inMemoryUserStorage;
-    }
 
-    private void validationUser(UserDto userDto) {
-        if (userDto.getName() == null || userDto.getName().isBlank()) {
-            log.info("Имя пользователя не может быть пустым");
-            throw new ValidationException("Имя пользователя не может быть пустым");
-        }
-    }
-
-    private void validationEmail(UserDto userDto) {
-        if (userDto.getEmail().isBlank() || !userDto.getEmail().contains("@")) {
-            log.info("Электронная почта не может быть пустой и должна содержать символ @");
-            throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
-        }
-        boolean findUser = inMemoryUserStorage.getListUsers().values()
-                .stream()
-                .anyMatch(user -> userDto.getEmail().equals(user.getEmail()));
-        if (findUser) {
-            log.info("Дубликат электронного адресса пользователя");
-            throw new DuplicateEmailException("Дубликат электронного адресса пользователя");
-        }
-    }
-
-    private void validationEmailNull(UserDto userDto) {
-        if (userDto.getEmail() == null) {
-            log.info("Электронная почта не может быть null");
-            throw new ValidationException("Электронная почта не может быть null");
-        }
-    }
-
+    @Transactional
     @Override
     public UserDto add(UserDto userDto) {
-        validationUser(userDto);
-        validationEmailNull(userDto);
-        validationEmail(userDto);
+        validateUser(userDto);
+        validateEmailNull(userDto);
+        validateEmail(userDto);
         User user = UserMapper.toUser(userDto);
-        return UserMapper.toUserDto(inMemoryUserStorage.add(user));
+        try {
+            userDto = UserMapper.toUserDto(userRepository.save(user));
+        } catch (DataIntegrityViolationException e) {
+            log.info("Duplicate of the user's email address");
+            throw new DuplicateEmailException("Duplicate of the user's email address");
+        }
+        return userDto;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public UserDto get(Long id) {
-        return UserMapper.toUserDto(inMemoryUserStorage.get(id));
+        try {
+            return UserMapper.toUserDto(userRepository.getById(id));
+        } catch (EntityNotFoundException e) {
+            log.info(String.format("There is no user with an ID  № %s", id));
+            throw new NotFoundException(String.format("There is no user with an ID  № %s", id));
+        }
     }
 
+    @Transactional
     @Override
     public UserDto update(Long id, UserDto userDto) {
-        User user = UserMapper.toUser(userDto);
-        return UserMapper.toUserDto(inMemoryUserStorage.update(id, user));
+        User oldUser = userRepository.getById(id);
+        User newUser = UserMapper.toUser(userDto);
+
+        if (userDto.getName() == null || userDto.getName().isBlank()) {
+            newUser.setName(oldUser.getName());
+        }
+        if (userDto.getEmail() == null || userDto.getEmail().isBlank()) {
+            newUser.setEmail(oldUser.getEmail());
+        } else {
+            validateEmailForUpdate(id, userDto);
+        }
+        newUser.setId(id);
+
+        try {
+            userDto = UserMapper.toUserDto(userRepository.save(newUser));
+        } catch (DataIntegrityViolationException e) {
+            log.info("Duplicate of the user's email address");
+            throw new DuplicateEmailException("Duplicate of the user's email address");
+        }
+        return userDto;
     }
 
+    @Transactional
     @Override
     public void delete(Long id) {
-        inMemoryItemStorage.getListItems().remove(id);  // удаляю пользователя с вещами
-        inMemoryUserStorage.delete(id);
+        userRepository.removeUserById(id);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<UserDto> getAll() {
-        return inMemoryUserStorage.getAll().stream()
+        return userRepository.findAll().stream()
                 .map((user) -> UserMapper.toUserDto(user))
                 .collect(Collectors.toList());
+    }
+
+    private void validateUser(UserDto userDto) {
+        if (userDto.getName() == null || userDto.getName().isBlank()) {
+            log.info("The user name cannot be empty");
+            throw new ValidationException("The user name cannot be empty");
+        }
+    }
+
+    private void validateEmail(UserDto userDto) {
+        if (userDto.getEmail().isBlank() || !userDto.getEmail().contains("@")) {
+            log.info("The email cannot be empty and must contain the character @");
+            throw new ValidationException("The email cannot be empty and must contain the character @");
+        }
+    }
+
+    private void validateEmailForUpdate(Long id, UserDto userDto) {
+        if (!userDto.getEmail().contains("@")) {
+            log.info("The email cannot be empty and must contain the character @");
+            throw new ValidationException("The email cannot be empty and must contain the character @");
+        }
+    }
+
+    private void validateEmailNull(UserDto userDto) {
+        if (userDto.getEmail() == null) {
+            log.info("Email cannot be null");
+            throw new ValidationException("Email cannot be null");
+        }
     }
 }
