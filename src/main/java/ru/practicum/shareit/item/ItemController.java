@@ -2,7 +2,6 @@ package ru.practicum.shareit.item;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,19 +23,19 @@ import java.util.List;
 @RestController
 @RequestMapping("/items")
 public class ItemController {
-    private static final String X_SHARER_USER_ID = "X-Sharer-User-Id";
+    private static final String OWNER_ID_HEADER = "X-Sharer-User-Id";
 
     private final ItemService itemService;
 
     @Autowired
-    public ItemController(@Qualifier("ItemServiceImpl") ItemService itemService) {
+    public ItemController(ItemService itemService) {
         this.itemService = itemService;
     }
 
 
     @PostMapping
     public ItemDto add(HttpServletRequest request,
-                       @RequestHeader(X_SHARER_USER_ID) Long owner,
+                       @RequestHeader(OWNER_ID_HEADER) Long owner,
                        @RequestBody ItemDto itemDto) {
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
@@ -45,7 +44,7 @@ public class ItemController {
 
     @PatchMapping("/{itemId}")
     public ItemDto update(HttpServletRequest request,
-                          @RequestHeader(X_SHARER_USER_ID) Long owner,
+                          @RequestHeader(OWNER_ID_HEADER) Long owner,
                           @PathVariable("itemId") Long id,
                           @RequestBody ItemDto itemDto) {
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
@@ -55,7 +54,7 @@ public class ItemController {
 
     @GetMapping("/{itemId}")
     public ItemAndLastAndNextBookingDto getUser(HttpServletRequest request,
-                                                @RequestHeader(X_SHARER_USER_ID) Long owner,
+                                                @RequestHeader(OWNER_ID_HEADER) Long owner,
                                                 @PathVariable("itemId") Long id) {
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
@@ -64,7 +63,7 @@ public class ItemController {
 
     @GetMapping
     public List<ItemAndLastAndNextBookingDto> getAllItemtoUser(HttpServletRequest request,
-                                                               @RequestHeader(X_SHARER_USER_ID) Long owner) {
+                                                               @RequestHeader(OWNER_ID_HEADER) Long owner) {
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         return itemService.getAllItemtoUser(owner);
@@ -72,7 +71,7 @@ public class ItemController {
 
     @GetMapping("/search")
     public List<ItemDto> getAllItemWithText(HttpServletRequest request,
-                                            @RequestHeader(X_SHARER_USER_ID) Long owner,
+                                            @RequestHeader(OWNER_ID_HEADER) Long owner,
                                             @RequestParam(value = "text") String text) {
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
@@ -82,7 +81,7 @@ public class ItemController {
 
     @PostMapping("/{itemId}/comment")
     public CommentDto add(HttpServletRequest request,
-                          @RequestHeader(X_SHARER_USER_ID) Long owner,
+                          @RequestHeader(OWNER_ID_HEADER) Long owner,
                           @PathVariable("itemId") Long id,
                           @RequestBody CommentDto commentDto) {
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",

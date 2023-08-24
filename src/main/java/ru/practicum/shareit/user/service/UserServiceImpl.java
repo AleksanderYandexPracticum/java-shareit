@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 
 @Slf4j
-@Service("UserServiceImpl")
+@Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 

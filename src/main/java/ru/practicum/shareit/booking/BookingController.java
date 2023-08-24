@@ -25,7 +25,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping(path = "/bookings")
 public class BookingController {
-    private static final String X_SHARER_USER_ID = "X-Sharer-User-Id";
+    private static final String OWNER_ID_HEADER = "X-Sharer-User-Id";
 
     private final BookingService bookingService;
 
@@ -37,7 +37,7 @@ public class BookingController {
 
     @PostMapping
     public BookingDto add(HttpServletRequest request,
-                          @RequestHeader(X_SHARER_USER_ID) Long owner,
+                          @RequestHeader(OWNER_ID_HEADER) Long owner,
                           @RequestBody RequestBookingDto requestBookingDto) {
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
@@ -46,7 +46,7 @@ public class BookingController {
 
     @PatchMapping("/{bookingId}")
     public BookingDto updateStatus(HttpServletRequest request,
-                                   @RequestHeader(X_SHARER_USER_ID) Long owner,
+                                   @RequestHeader(OWNER_ID_HEADER) Long owner,
                                    @PathVariable Long bookingId,
                                    @RequestParam(value = "approved") Boolean approved) {
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
@@ -56,7 +56,7 @@ public class BookingController {
 
     @GetMapping("/{bookingId}")
     public BookingDto getBookingById(HttpServletRequest request,
-                                     @RequestHeader(X_SHARER_USER_ID) Long ownerOrBooker,
+                                     @RequestHeader(OWNER_ID_HEADER) Long ownerOrBooker,
                                      @PathVariable("bookingId") Long id) {
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
@@ -65,7 +65,7 @@ public class BookingController {
 
     @GetMapping
     public List<BookingDto> getAllBookingsByUserId(HttpServletRequest request,
-                                                   @RequestHeader(X_SHARER_USER_ID) Long owner,
+                                                   @RequestHeader(OWNER_ID_HEADER) Long owner,
                                                    @RequestParam(value = "state") Optional<String> state) {
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
@@ -74,7 +74,7 @@ public class BookingController {
 
     @GetMapping("/owner")
     public List<BookingDto> getAllBookingsAllItemsByUserId(HttpServletRequest request,
-                                                           @RequestHeader(X_SHARER_USER_ID) Long owner,
+                                                           @RequestHeader(OWNER_ID_HEADER) Long owner,
                                                            @RequestParam(value = "state") Optional<String> state) {
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());

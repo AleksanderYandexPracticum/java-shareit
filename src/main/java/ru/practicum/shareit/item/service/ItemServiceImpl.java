@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 
 @Slf4j
-@Service("ItemServiceImpl")
+@Service
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
@@ -210,10 +210,12 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getName() == null || itemDto.getName().isBlank()) {
             log.info("The name of the item cannot be empty");
             throw new ValidationException("The name of the item cannot be empty");
-        } else if (itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
+        }
+        if (itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
             log.info("The description cannot be empty");
             throw new ValidationException("The description cannot be empty");
-        } else if (itemDto.getAvailable() == null) {
+        }
+        if (itemDto.getAvailable() == null) {
             log.info("The rental status cannot be empty");
             throw new ValidationException("The rental status cannot be empty");
         }
