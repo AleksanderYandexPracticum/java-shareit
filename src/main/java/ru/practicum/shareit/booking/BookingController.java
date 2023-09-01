@@ -66,18 +66,22 @@ public class BookingController {
     @GetMapping
     public List<BookingDto> getAllBookingsByUserId(HttpServletRequest request,
                                                    @RequestHeader(OWNER_ID_HEADER) Long owner,
-                                                   @RequestParam(value = "state") Optional<String> state) {
+                                                   @RequestParam(value = "state") Optional<String> state,
+                                                   @RequestParam(required = false, value = "from") Integer from,
+                                                   @RequestParam(required = false, value = "size") Integer size) {
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return bookingService.getAllBookingsByUserId(owner, state.orElseGet(() -> "ALL"));
+        return bookingService.getAllBookingsByUserId(owner, state.orElseGet(() -> "ALL"), from, size);
     }
 
     @GetMapping("/owner")
     public List<BookingDto> getAllBookingsAllItemsByUserId(HttpServletRequest request,
                                                            @RequestHeader(OWNER_ID_HEADER) Long owner,
-                                                           @RequestParam(value = "state") Optional<String> state) {
+                                                           @RequestParam(value = "state") Optional<String> state,
+                                                           @RequestParam(required = false, value = "from") Integer from,
+                                                           @RequestParam(required = false, value = "size") Integer size) {
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return bookingService.getAllBookingsAllItemsByUserId(owner, state.orElseGet(() -> "ALL"));
+        return bookingService.getAllBookingsAllItemsByUserId(owner, state.orElseGet(() -> "ALL"), from, size);
     }
 }

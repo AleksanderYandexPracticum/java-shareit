@@ -16,7 +16,7 @@ public class ItemAndLastAndNextBookingDto {
     private String name;
     private String description;
     private Boolean available;
-    private Long request;
+    private Long requestId;
     private BookingNewNameIdDto lastBooking;
     private BookingNewNameIdDto nextBooking;
     private List<CommentCreatedStringDto> comments;

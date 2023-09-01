@@ -68,7 +68,7 @@ public class InMemoryItemStorage implements ItemStorage {
             findItem.setName(item.getName() == null ? findItem.getName() : item.getName());
             findItem.setDescription(item.getDescription() == null ? findItem.getDescription() : item.getDescription());
             findItem.setAvailable(item.getAvailable() == null ? findItem.getAvailable() : item.getAvailable());
-            findItem.setRequest(item.getRequest() == null ? findItem.getRequest() : item.getRequest());
+            findItem.setRequestId(item.getRequestId() == null ? findItem.getRequestId() : item.getRequestId());
 
             items.add(findItem);
         } else {

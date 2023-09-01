@@ -2,6 +2,9 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingMapper;
@@ -75,7 +78,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<BookingDto> getAllBookingsByUserId(Long owner, String state) {
+    public List<BookingDto> getAllBookingsByUserId(Long owner, String state, Integer from, Integer size) {
         validateIdOwnerHaveItem(owner);
         validateState(state);
 
@@ -84,37 +87,71 @@ public class BookingServiceImpl implements BookingService {
         LocalDateTime dateTime2 = dateTime1;
         User user = userRepository.findUserById(owner);
 
-        if (state.equals("ALL")) {
-            bookingDto = bookingRepository.getBookingsByBookerOrderByStartDesc(user).stream()
-                    .map(booking -> BookingMapper.toBookingDto(booking))
-                    .collect(Collectors.toList());
-        } else if (state.equals("WAITING")) {
-            bookingDto = bookingRepository.getBookingByBookerAndStatusOrderByStartDesc(user, Status.WAITING).stream()
-                    .map(booking -> BookingMapper.toBookingDto(booking))
-                    .collect(Collectors.toList());
-        } else if (state.equals("REJECTED")) {
-            bookingDto = bookingRepository.getBookingByBookerAndStatusOrderByStartDesc(user, Status.REJECTED).stream()
-                    .map(booking -> BookingMapper.toBookingDto(booking))
-                    .collect(Collectors.toList());
-        } else if (state.equals("CURRENT")) {
-            bookingDto = bookingRepository.getBookingByBookerAndStartBeforeAndEndAfterOrderByStartDesc(user, dateTime1, dateTime2).stream()
-                    .map(booking -> BookingMapper.toBookingDto(booking))
-                    .collect(Collectors.toList());
-        } else if (state.equals("PAST")) {
-            bookingDto = bookingRepository.getBookingByBookerAndEndBeforeOrderByStartDesc(user, dateTime1).stream()
-                    .map(booking -> BookingMapper.toBookingDto(booking))
-                    .collect(Collectors.toList());
-        } else if (state.equals("FUTURE")) {
-            bookingDto = bookingRepository.getBookingByBookerAndStartAfterOrderByStartDesc(user, dateTime1).stream()
-                    .map(booking -> BookingMapper.toBookingDto(booking))
-                    .collect(Collectors.toList());
+        if (from != null && size != null) {
+            validateParametersPagination(from, size);
+            Sort sort = Sort.by(Sort.Direction.DESC, "start");
+            Integer pageNumber = from / size;
+            Pageable pageable = PageRequest.of(pageNumber, size, sort);
+
+            if (state.equals("ALL")) {
+                bookingDto = bookingRepository.getBookingsByBookerOrderByStartDesc(user, pageable).stream()
+                        .map(booking -> BookingMapper.toBookingDto(booking))
+                        .collect(Collectors.toList());
+            } else if (state.equals("WAITING")) {
+                bookingDto = bookingRepository.getBookingByBookerAndStatusOrderByStartDesc(user, Status.WAITING, pageable).stream()
+                        .map(booking -> BookingMapper.toBookingDto(booking))
+                        .collect(Collectors.toList());
+            } else if (state.equals("REJECTED")) {
+                bookingDto = bookingRepository.getBookingByBookerAndStatusOrderByStartDesc(user, Status.REJECTED, pageable).stream()
+                        .map(booking -> BookingMapper.toBookingDto(booking))
+                        .collect(Collectors.toList());
+            } else if (state.equals("CURRENT")) {
+                bookingDto = bookingRepository.getBookingByBookerAndStartBeforeAndEndAfterOrderByStartDesc(user, dateTime1, dateTime2, pageable).stream()
+                        .map(booking -> BookingMapper.toBookingDto(booking))
+                        .collect(Collectors.toList());
+            } else if (state.equals("PAST")) {
+                bookingDto = bookingRepository.getBookingByBookerAndEndBeforeOrderByStartDesc(user, dateTime1, pageable).stream()
+                        .map(booking -> BookingMapper.toBookingDto(booking))
+                        .collect(Collectors.toList());
+            } else if (state.equals("FUTURE")) {
+                bookingDto = bookingRepository.getBookingByBookerAndStartAfterOrderByStartDesc(user, dateTime1, pageable).stream()
+                        .map(booking -> BookingMapper.toBookingDto(booking))
+                        .collect(Collectors.toList());
+            }
+        } else {
+            if (state.equals("ALL")) {
+                bookingDto = bookingRepository.getBookingsByBookerOrderByStartDesc(user).stream()
+                        .map(booking -> BookingMapper.toBookingDto(booking))
+                        .collect(Collectors.toList());
+            } else if (state.equals("WAITING")) {
+                bookingDto = bookingRepository.getBookingByBookerAndStatusOrderByStartDesc(user, Status.WAITING).stream()
+                        .map(booking -> BookingMapper.toBookingDto(booking))
+                        .collect(Collectors.toList());
+            } else if (state.equals("REJECTED")) {
+                bookingDto = bookingRepository.getBookingByBookerAndStatusOrderByStartDesc(user, Status.REJECTED).stream()
+                        .map(booking -> BookingMapper.toBookingDto(booking))
+                        .collect(Collectors.toList());
+            } else if (state.equals("CURRENT")) {
+                bookingDto = bookingRepository.getBookingByBookerAndStartBeforeAndEndAfterOrderByStartDesc(user, dateTime1, dateTime2).stream()
+                        .map(booking -> BookingMapper.toBookingDto(booking))
+                        .collect(Collectors.toList());
+            } else if (state.equals("PAST")) {
+                bookingDto = bookingRepository.getBookingByBookerAndEndBeforeOrderByStartDesc(user, dateTime1).stream()
+                        .map(booking -> BookingMapper.toBookingDto(booking))
+                        .collect(Collectors.toList());
+            } else if (state.equals("FUTURE")) {
+                bookingDto = bookingRepository.getBookingByBookerAndStartAfterOrderByStartDesc(user, dateTime1).stream()
+                        .map(booking -> BookingMapper.toBookingDto(booking))
+                        .collect(Collectors.toList());
+            }
         }
+
         return bookingDto;
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<BookingDto> getAllBookingsAllItemsByUserId(Long owner, String state) {
+    public List<BookingDto> getAllBookingsAllItemsByUserId(Long owner, String state, Integer from, Integer size) {
         List<Long> itemIds = validateIdOwnerHaveItem(owner).stream()
                 .map(item -> item.getId())
                 .collect(Collectors.toList());
@@ -124,30 +161,64 @@ public class BookingServiceImpl implements BookingService {
         LocalDateTime dateTime1 = LocalDateTime.now();
         LocalDateTime dateTime2 = dateTime1;
 
-        if (state.equals("ALL")) {
-            bookingDto = bookingRepository.getBookingsByItemIdInOrderByStartDesc(itemIds).stream()
-                    .map(booking -> BookingMapper.toBookingDto(booking))
-                    .collect(Collectors.toList());
-        } else if (state.equals("WAITING")) {
-            bookingDto = bookingRepository.getBookingByItemIdInAndStatusOrderByStartDesc(itemIds, Status.WAITING).stream()
-                    .map(booking -> BookingMapper.toBookingDto(booking))
-                    .collect(Collectors.toList());
-        } else if (state.equals("REJECTED")) {
-            bookingDto = bookingRepository.getBookingByItemIdInAndStatusOrderByStartDesc(itemIds, Status.REJECTED).stream()
-                    .map(booking -> BookingMapper.toBookingDto(booking))
-                    .collect(Collectors.toList());
-        } else if (state.equals("CURRENT")) {
-            bookingDto = bookingRepository.getBookingByItemIdInAndStartBeforeAndEndAfterOrderByStartDesc(itemIds, dateTime1, dateTime2).stream()
-                    .map(booking -> BookingMapper.toBookingDto(booking))
-                    .collect(Collectors.toList());
-        } else if (state.equals("PAST")) {
-            bookingDto = bookingRepository.getBookingByItemIdInAndEndBeforeOrderByStartDesc(itemIds, dateTime1).stream()
-                    .map(booking -> BookingMapper.toBookingDto(booking))
-                    .collect(Collectors.toList());
-        } else if (state.equals("FUTURE")) {
-            bookingDto = bookingRepository.getBookingByItemIdInAndStartAfterOrderByStartDesc(itemIds, dateTime1).stream()
-                    .map(booking -> BookingMapper.toBookingDto(booking))
-                    .collect(Collectors.toList());
+        if (from != null && size != null) {
+            validateParametersPagination(from, size);
+            Sort sort = Sort.by(Sort.Direction.DESC, "start");
+            Integer pageNumber = from / size;
+            Pageable pageable = PageRequest.of(pageNumber, size, sort);
+
+            if (state.equals("ALL")) {
+                bookingDto = bookingRepository.getBookingsByItemIdInOrderByStartDesc(itemIds, pageable).stream()
+                        .map(booking -> BookingMapper.toBookingDto(booking))
+                        .collect(Collectors.toList());
+            } else if (state.equals("WAITING")) {
+                bookingDto = bookingRepository.getBookingByItemIdInAndStatusOrderByStartDesc(itemIds, Status.WAITING, pageable).stream()
+                        .map(booking -> BookingMapper.toBookingDto(booking))
+                        .collect(Collectors.toList());
+            } else if (state.equals("REJECTED")) {
+                bookingDto = bookingRepository.getBookingByItemIdInAndStatusOrderByStartDesc(itemIds, Status.REJECTED, pageable).stream()
+                        .map(booking -> BookingMapper.toBookingDto(booking))
+                        .collect(Collectors.toList());
+            } else if (state.equals("CURRENT")) {
+                bookingDto = bookingRepository.getBookingByItemIdInAndStartBeforeAndEndAfterOrderByStartDesc(itemIds, dateTime1, dateTime2, pageable).stream()
+                        .map(booking -> BookingMapper.toBookingDto(booking))
+                        .collect(Collectors.toList());
+            } else if (state.equals("PAST")) {
+                bookingDto = bookingRepository.getBookingByItemIdInAndEndBeforeOrderByStartDesc(itemIds, dateTime1, pageable).stream()
+                        .map(booking -> BookingMapper.toBookingDto(booking))
+                        .collect(Collectors.toList());
+            } else if (state.equals("FUTURE")) {
+                bookingDto = bookingRepository.getBookingByItemIdInAndStartAfterOrderByStartDesc(itemIds, dateTime1, pageable).stream()
+                        .map(booking -> BookingMapper.toBookingDto(booking))
+                        .collect(Collectors.toList());
+            }
+        } else {
+            if (state.equals("ALL")) {
+                bookingDto = bookingRepository.getBookingsByItemIdInOrderByStartDesc(itemIds).stream()
+                        .map(booking -> BookingMapper.toBookingDto(booking))
+                        .collect(Collectors.toList());
+            } else if (state.equals("WAITING")) {
+                bookingDto = bookingRepository.getBookingByItemIdInAndStatusOrderByStartDesc(itemIds, Status.WAITING).stream()
+                        .map(booking -> BookingMapper.toBookingDto(booking))
+                        .collect(Collectors.toList());
+            } else if (state.equals("REJECTED")) {
+                bookingDto = bookingRepository.getBookingByItemIdInAndStatusOrderByStartDesc(itemIds, Status.REJECTED).stream()
+                        .map(booking -> BookingMapper.toBookingDto(booking))
+                        .collect(Collectors.toList());
+            } else if (state.equals("CURRENT")) {
+                bookingDto = bookingRepository.getBookingByItemIdInAndStartBeforeAndEndAfterOrderByStartDesc(itemIds, dateTime1, dateTime2).stream()
+                        .map(booking -> BookingMapper.toBookingDto(booking))
+                        .collect(Collectors.toList());
+            } else if (state.equals("PAST")) {
+                bookingDto = bookingRepository.getBookingByItemIdInAndEndBeforeOrderByStartDesc(itemIds, dateTime1).stream()
+                        .map(booking -> BookingMapper.toBookingDto(booking))
+                        .collect(Collectors.toList());
+            } else if (state.equals("FUTURE")) {
+                bookingDto = bookingRepository.getBookingByItemIdInAndStartAfterOrderByStartDesc(itemIds, dateTime1).stream()
+                        .map(booking -> BookingMapper.toBookingDto(booking))
+                        .collect(Collectors.toList());
+            }
+
         }
         return bookingDto;
     }
@@ -236,6 +307,17 @@ public class BookingServiceImpl implements BookingService {
         if (item.getOwner().equals(owner)) {
             log.info("It's its own thing");
             throw new NotFoundException(String.format("It's its own thing № %s", requestBookingDto.getItemId()));
+        }
+    }
+
+    private void validateParametersPagination(Integer from, Integer size) {
+        if (size == 0) {
+            log.info("The parameters page is wrong size=0");
+            throw new ValidationException("The parameters page is wrong size=0");
+        }
+        if ((from < 0 && size > 0) || (from >= 0 && size < 0) || (from < 0 && size < 0)) {
+            log.info("The parameters page is wrong");
+            throw new ValidationException("The parameters page is wrong from= " + from + ";   size= " + size);
         }
     }
 }
