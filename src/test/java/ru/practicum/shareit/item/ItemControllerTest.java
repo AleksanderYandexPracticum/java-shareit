@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,7 +18,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,7 +46,7 @@ class ItemControllerTest {
 
         ItemDto actualItemDto = itemController.add(request, owner, itemDto);
 
-        assertEquals(itemDto, actualItemDto);
+        Assertions.assertEquals(itemDto, actualItemDto);
     }
 
     @Test
@@ -64,7 +64,7 @@ class ItemControllerTest {
 
         ItemDto actualItemDto = itemController.update(request, owner, id, itemDto);
 
-        assertEquals(itemDto, actualItemDto);
+        Assertions.assertEquals(itemDto, actualItemDto);
     }
 
     @Test
@@ -84,7 +84,7 @@ class ItemControllerTest {
 
         ItemAndLastAndNextBookingDto actualItem = itemController.getUser(request, owner, id);
 
-        assertEquals(itemDto.getName(), actualItem.getName());
+        Assertions.assertEquals(itemDto.getName(), actualItem.getName());
     }
 
     @Test
@@ -106,7 +106,7 @@ class ItemControllerTest {
 
         List<ItemAndLastAndNextBookingDto> actualItemsDto = itemController.getAllItemtoUser(request, owner, from, size);
 
-        assertEquals(itemDto.getName(), actualItemsDto.get(0).getName());
+        Assertions.assertEquals(itemDto.getName(), actualItemsDto.get(0).getName());
     }
 
     @Test
@@ -128,7 +128,7 @@ class ItemControllerTest {
 
         List<ItemDto> actualItemsDto = itemController.getAllItemWithText(request, owner, text, from, size);
 
-        assertEquals(itemDto, actualItemsDto.get(0));
+        Assertions.assertEquals(itemDto, actualItemsDto.get(0));
     }
 
     @Test
@@ -148,6 +148,6 @@ class ItemControllerTest {
 
         CommentDto actualCommentDto = itemController.add(request, owner, id, commentDto);
 
-        assertEquals(commentDto, actualCommentDto);
+        Assertions.assertEquals(commentDto, actualCommentDto);
     }
 }

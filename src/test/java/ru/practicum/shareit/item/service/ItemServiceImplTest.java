@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.service;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -30,7 +31,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
@@ -85,9 +85,9 @@ class ItemServiceImplTest {
 
         ItemDto actualItemDto = itemServiceImpl.add(owner, itemDto);
 
-        assertEquals(item.getName(), actualItemDto.getName());
-        assertEquals(item.getDescription(), actualItemDto.getDescription());
-        assertEquals(ItemMapper.toItemDto(item), actualItemDto);
+        Assertions.assertEquals(item.getName(), actualItemDto.getName());
+        Assertions.assertEquals(item.getDescription(), actualItemDto.getDescription());
+        Assertions.assertEquals(ItemMapper.toItemDto(item), actualItemDto);
 
         ItemDto itemDto1 = ItemDto.builder()
                 .id(null)
@@ -97,7 +97,7 @@ class ItemServiceImplTest {
                 .requestId(null)
                 .build();
 
-        assertThrows(ValidationException.class, () -> itemServiceImpl.add(owner, itemDto1));
+        Assertions.assertThrows(ValidationException.class, () -> itemServiceImpl.add(owner, itemDto1));
 
         ItemDto itemDto2 = ItemDto.builder()
                 .id(null)
@@ -106,7 +106,7 @@ class ItemServiceImplTest {
                 .available(true)
                 .requestId(null)
                 .build();
-        assertThrows(ValidationException.class, () -> itemServiceImpl.add(owner, itemDto2));
+        Assertions.assertThrows(ValidationException.class, () -> itemServiceImpl.add(owner, itemDto2));
 
         ItemDto itemDto3 = ItemDto.builder()
                 .id(null)
@@ -115,10 +115,10 @@ class ItemServiceImplTest {
                 .available(null)
                 .requestId(null)
                 .build();
-        assertThrows(ValidationException.class, () -> itemServiceImpl.add(owner, itemDto3));
+        Assertions.assertThrows(ValidationException.class, () -> itemServiceImpl.add(owner, itemDto3));
 
         when(userRepository.existsById(anyLong())).thenReturn(false);
-        assertThrows(NotFoundException.class, () -> itemServiceImpl.add(owner, itemDto));
+        Assertions.assertThrows(NotFoundException.class, () -> itemServiceImpl.add(owner, itemDto));
     }
 
     @Test
@@ -160,11 +160,11 @@ class ItemServiceImplTest {
         ItemAndLastAndNextBookingDto itemAndLastAndNextBookingDto = itemServiceImpl.get(id, owner);
 
 
-        assertEquals(item.getName(), itemAndLastAndNextBookingDto.getName());
-        assertEquals(item.getDescription(), itemAndLastAndNextBookingDto.getDescription());
+        Assertions.assertEquals(item.getName(), itemAndLastAndNextBookingDto.getName());
+        Assertions.assertEquals(item.getDescription(), itemAndLastAndNextBookingDto.getDescription());
 
         when(itemRepository.existsById(anyLong())).thenReturn(false);
-        assertThrows(NotFoundException.class, () -> itemServiceImpl.get(id, owner));
+        Assertions.assertThrows(NotFoundException.class, () -> itemServiceImpl.get(id, owner));
     }
 
     @Test
@@ -201,19 +201,19 @@ class ItemServiceImplTest {
         verify(itemRepository).save(itemArgumentCaptor.capture());
         Item saveItem = itemArgumentCaptor.getValue();
 
-        assertEquals(itemDto.getName(), saveItem.getName());
-        assertEquals(itemDto.getDescription(), saveItem.getDescription());
+        Assertions.assertEquals(itemDto.getName(), saveItem.getName());
+        Assertions.assertEquals(itemDto.getDescription(), saveItem.getDescription());
 
         when(itemRepository.save(any())).thenReturn(saveItem);
         ItemDto actualItemDto = itemServiceImpl.update(id, owner, itemDto);
 
-        assertEquals(saveItem.getName(), actualItemDto.getName());
-        assertEquals(saveItem.getDescription(), actualItemDto.getDescription());
-        assertEquals(ItemMapper.toItemDto(saveItem), actualItemDto);
+        Assertions.assertEquals(saveItem.getName(), actualItemDto.getName());
+        Assertions.assertEquals(saveItem.getDescription(), actualItemDto.getDescription());
+        Assertions.assertEquals(ItemMapper.toItemDto(saveItem), actualItemDto);
 
         item.setOwner(2L);
         when(itemRepository.findItemById(anyLong())).thenReturn(item);
-        assertThrows(NotFoundException.class, () -> itemServiceImpl.update(id, owner, itemDto));
+        Assertions.assertThrows(NotFoundException.class, () -> itemServiceImpl.update(id, owner, itemDto));
 
     }
 
@@ -255,12 +255,12 @@ class ItemServiceImplTest {
         List<ItemAndLastAndNextBookingDto> itemsAndLastAndNextBookingDto = itemServiceImpl.getAllItemToUser(owner, from, size);
 
 
-        assertEquals(item.getName(), itemsAndLastAndNextBookingDto.get(0).getName());
-        assertEquals(item.getDescription(), itemsAndLastAndNextBookingDto.get(0).getDescription());
-        assertEquals(item.getAvailable(), itemsAndLastAndNextBookingDto.get(0).getAvailable());
+        Assertions.assertEquals(item.getName(), itemsAndLastAndNextBookingDto.get(0).getName());
+        Assertions.assertEquals(item.getDescription(), itemsAndLastAndNextBookingDto.get(0).getDescription());
+        Assertions.assertEquals(item.getAvailable(), itemsAndLastAndNextBookingDto.get(0).getAvailable());
 
         when(itemRepository.existsById(anyLong())).thenReturn(false);
-        assertThrows(NotFoundException.class, () -> itemServiceImpl.get(id, owner));
+        Assertions.assertThrows(NotFoundException.class, () -> itemServiceImpl.get(id, owner));
 
     }
 
@@ -291,13 +291,13 @@ class ItemServiceImplTest {
 
         List<ItemDto> itemsDto = itemServiceImpl.getAllItemWithText(text1, owner, from, size);
 
-        assertEquals(item.getName(), itemsDto.get(0).getName());
-        assertEquals(item.getDescription(), itemsDto.get(0).getDescription());
-        assertEquals(ItemMapper.toItemDto(item), itemsDto.get(0));
+        Assertions.assertEquals(item.getName(), itemsDto.get(0).getName());
+        Assertions.assertEquals(item.getDescription(), itemsDto.get(0).getDescription());
+        Assertions.assertEquals(ItemMapper.toItemDto(item), itemsDto.get(0));
 
         text1 = "";
         itemsDto = itemServiceImpl.getAllItemWithText(text1, owner, from, size);
-        assertEquals(0, itemsDto.size());
+        Assertions.assertEquals(0, itemsDto.size());
     }
 
     @Test
@@ -344,13 +344,13 @@ class ItemServiceImplTest {
         Comment saveComment = commentArgumentCaptor.getValue();
 
 
-        assertEquals(saveComment.getText(), commentDto.getText());
-        assertEquals(saveComment.getItem(), item);
-        assertEquals(saveComment.getAuthor(), user);
+        Assertions.assertEquals(saveComment.getText(), commentDto.getText());
+        Assertions.assertEquals(saveComment.getItem(), item);
+        Assertions.assertEquals(saveComment.getAuthor(), user);
 
-        assertEquals(comment.getText(), actualCommentDto.getText());
+        Assertions.assertEquals(comment.getText(), actualCommentDto.getText());
 
         commentDto.setText("");
-        assertThrows(ValidationException.class, () -> itemServiceImpl.addComment(owner, id, commentDto));
+        Assertions.assertThrows(ValidationException.class, () -> itemServiceImpl.addComment(owner, id, commentDto));
     }
 }

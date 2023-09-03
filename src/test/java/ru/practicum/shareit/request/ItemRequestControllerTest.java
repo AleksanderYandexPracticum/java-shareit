@@ -1,5 +1,6 @@
 package ru.practicum.shareit.request;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -48,7 +48,7 @@ class ItemRequestControllerTest {
 
         ItemRequestDto actualItemRequestDto = itemRequestController.add(request, owner, itemRequestDto);
 
-        assertEquals(itemRequestDto, actualItemRequestDto);
+        Assertions.assertEquals(itemRequestDto, actualItemRequestDto);
     }
 
     @Test
@@ -68,7 +68,7 @@ class ItemRequestControllerTest {
 
         List<ItemRequestDto> actualItemsRequestDto = itemRequestController.getYourRequestsWithResponse(request, owner, state);
 
-        assertEquals(itemRequestDto.getDescription(), actualItemsRequestDto.get(0).getDescription());
+        Assertions.assertEquals(itemRequestDto.getDescription(), actualItemsRequestDto.get(0).getDescription());
 
     }
 
@@ -90,7 +90,7 @@ class ItemRequestControllerTest {
 
         List<ItemRequestDto> actualItemsRequestDto = itemRequestController.listOfRequestsFromOtherUsers(request, owner, from, size);
 
-        assertEquals(itemRequestDto.getDescription(), actualItemsRequestDto.get(0).getDescription());
+        Assertions.assertEquals(itemRequestDto.getDescription(), actualItemsRequestDto.get(0).getDescription());
 
     }
 
@@ -112,6 +112,6 @@ class ItemRequestControllerTest {
 
         ItemRequestDto actualItemRequestDto = itemRequestController.getRequestsWithResponse(request, owner, requestId);
 
-        assertEquals(itemRequestDto.getDescription(), actualItemRequestDto.getDescription());
+        Assertions.assertEquals(itemRequestDto.getDescription(), actualItemRequestDto.getDescription());
     }
 }

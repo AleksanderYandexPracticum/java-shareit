@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,7 +17,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -50,7 +50,7 @@ class BookingControllerTest {
 
         BookingDto actualItemDto = bookingController.add(request, owner, requestBookingDto);
 
-        assertEquals(bookingDto, actualItemDto);
+        Assertions.assertEquals(bookingDto, actualItemDto);
     }
 
     @Test
@@ -71,7 +71,7 @@ class BookingControllerTest {
 
         BookingDto actualItemDto = bookingController.updateStatus(request, owner, bookingId, approved);
 
-        assertEquals(bookingDto, actualItemDto);
+        Assertions.assertEquals(bookingDto, actualItemDto);
     }
 
     @Test
@@ -91,7 +91,7 @@ class BookingControllerTest {
 
         BookingDto actualItemDto = bookingController.getBookingById(request, ownerOrBooker, id);
 
-        assertEquals(bookingDto, actualItemDto);
+        Assertions.assertEquals(bookingDto, actualItemDto);
     }
 
     @Test
@@ -115,7 +115,7 @@ class BookingControllerTest {
 
         List<BookingDto> actualItemDto = bookingController.getAllBookingsByUserId(request, owner, state, from, size);
 
-        assertEquals(bookingDto, actualItemDto.get(0));
+        Assertions.assertEquals(bookingDto, actualItemDto.get(0));
     }
 
     @Test
@@ -139,6 +139,6 @@ class BookingControllerTest {
 
         List<BookingDto> actualItemDto = bookingController.getAllBookingsAllItemsByUserId(request, owner, state, from, size);
 
-        assertEquals(bookingDto, actualItemDto.get(0));
+        Assertions.assertEquals(bookingDto, actualItemDto.get(0));
     }
 }

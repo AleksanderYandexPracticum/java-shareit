@@ -92,6 +92,7 @@ public class RequestServiceImpl implements RequestService {
         List<ItemRequest> listItemRequest = requestRepository.getItemRequestByIdOrderByCreatedDesc(requestId);
 
         if (listItemRequest.size() == 0) {
+            log.info(String.format("There is no requestId № %s", requestId));
             throw new NotFoundException(String.format("There is no requestId № %s", requestId));
         }
 

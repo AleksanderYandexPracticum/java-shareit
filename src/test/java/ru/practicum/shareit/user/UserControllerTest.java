@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -16,7 +17,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,7 +41,7 @@ class UserControllerTest {
 
         UserDto actualUserDto = userController.add(request, user);
 
-        assertEquals(user, actualUserDto);
+        Assertions.assertEquals(user, actualUserDto);
 
     }
 
@@ -52,7 +52,7 @@ class UserControllerTest {
 
         UserDto actualUserDto = userController.update(request, 1L, user);
 
-        assertEquals(user, actualUserDto);
+        Assertions.assertEquals(user, actualUserDto);
     }
 
     @Test
@@ -62,7 +62,7 @@ class UserControllerTest {
 
         UserDto actualUserDto = userController.getUser(request, 1L);
 
-        assertEquals(user, actualUserDto);
+        Assertions.assertEquals(user, actualUserDto);
     }
 
     @Test
@@ -78,6 +78,6 @@ class UserControllerTest {
         when(userService.getAll()).thenReturn(list);
 
         List<UserDto> actualList = userController.getAll(request);
-        assertEquals(list, actualList);
+        Assertions.assertEquals(list, actualList);
     }
 }

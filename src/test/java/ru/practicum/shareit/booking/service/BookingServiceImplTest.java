@@ -7,13 +7,13 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.RequestBookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.StatusException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -21,8 +21,11 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,6 +46,13 @@ class BookingServiceImplTest {
 
     @Captor
     private ArgumentCaptor<Booking> bookingArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<User> userArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<List<Long>> itemIdsArgumentCaptor;
+
 
     @Test
     void add() {
@@ -91,7 +101,7 @@ class BookingServiceImplTest {
         requestBookingDto.setStart(LocalDateTime.now().minusDays(3L));
         assertThrows(ValidationException.class, () -> bookingServiceimpl.add(owner, requestBookingDto, LocalDateTime.now()));
 
-        requestBookingDto.setStart(LocalDateTime.now());
+        requestBookingDto.setStart(LocalDateTime.now().plusDays(1L));
         assertThrows(NotFoundException.class, () -> bookingServiceimpl.add(1L, requestBookingDto, LocalDateTime.now()));
 
     }
@@ -137,7 +147,7 @@ class BookingServiceImplTest {
     @Test
     void getById() {
         Long id = 1L;
-        Long  ownerOrBooker = 1L;
+        Long ownerOrBooker = 1L;
 
         Item item = new Item(
                 null, "Топор", "тупой", true, 2L, 1L);
@@ -176,8 +186,9 @@ class BookingServiceImplTest {
     @Test
     void getAllBookingsByUserId() {
         Long owner = 1L;
-        Long bookingId = 1L;
-        Boolean approved = true;
+        Integer from = 0;
+        Integer size = 1;
+        String state = "ALL";
 
         RequestBookingDto requestBookingDto = new RequestBookingDto(
                 LocalDateTime.now().plusDays(1L),
@@ -185,6 +196,7 @@ class BookingServiceImplTest {
                 1L);
         Item item = new Item(
                 null, "Топор", "тупой", true, 1L, 1L);
+        List<Item> listItems = List.of(item);
         User user = new User("Boris", "bJ@mail.ru");
         user.setId(1L);
         Booking booking = Booking.builder()
@@ -195,17 +207,105 @@ class BookingServiceImplTest {
                 .booker(user)
                 .status(Status.WAITING)
                 .build();
+        List<Booking> listsBooking = List.of(booking);
 
 
+        when(itemRepository.findItemsByOwner(any())).thenReturn(listItems);
 
+        when(userRepository.findUserById(any())).thenReturn(user);
 
+        when(bookingRepository.getBookingsByBookerOrderByStartDesc(any(), any())).thenReturn(listsBooking);
 
+        List<BookingDto> listBookingDto = bookingServiceimpl.getAllBookingsByUserId(owner, state, from, size);
 
+        verify(bookingRepository).getBookingsByBookerOrderByStartDesc(userArgumentCaptor.capture(), any());
+        User saveUser = userArgumentCaptor.getValue();
+        assertEquals(user, saveUser);
+        assertEquals(item, listBookingDto.get(0).getItem());
 
+        listBookingDto = bookingServiceimpl.getAllBookingsByUserId(owner, "WAITING", from, size);
+        assertTrue(listBookingDto.size() == 0);
+        listBookingDto = bookingServiceimpl.getAllBookingsByUserId(owner, "REJECTED", from, size);
+        assertTrue(listBookingDto.size() == 0);
+        listBookingDto = bookingServiceimpl.getAllBookingsByUserId(owner, "CURRENT", from, size);
+        assertTrue(listBookingDto.size() == 0);
+        listBookingDto = bookingServiceimpl.getAllBookingsByUserId(owner, "PAST", from, size);
+        assertTrue(listBookingDto.size() == 0);
+        listBookingDto = bookingServiceimpl.getAllBookingsByUserId(owner, "FUTURE", from, size);
+        assertTrue(listBookingDto.size() == 0);
+
+        when(itemRepository.findItemsByOwner(any())).thenReturn(null);
+        assertThrows(NotFoundException.class, () -> bookingServiceimpl.getAllBookingsByUserId(owner, state, from, size));
+        when(itemRepository.findItemsByOwner(any())).thenReturn(listItems);
+        assertThrows(StatusException.class, () -> bookingServiceimpl.getAllBookingsByUserId(owner, "ERORR", from, size));
 
     }
 
     @Test
     void getAllBookingsAllItemsByUserId() {
+        Long owner = 1L;
+        Long bookingId = 1L;
+        Boolean approved = true;
+        Integer from = 0;
+        Integer size = 1;
+        String state = "ALL";
+
+        RequestBookingDto requestBookingDto = new RequestBookingDto(
+                LocalDateTime.now().plusDays(1L),
+                LocalDateTime.now().plusDays(2L),
+                1L);
+        Item item = new Item(
+                1L, "Топор", "тупой", true, 1L, 1L);
+        List<Item> listItems = List.of(item);
+        User user = new User("Boris", "bJ@mail.ru");
+        user.setId(1L);
+        BookingDto bookingDto = BookingDto.builder()
+                .id(1L)
+                .start(LocalDateTime.now())
+                .end(LocalDateTime.now().plusDays(1L))
+                .item(item)
+                .booker(user)
+                .status(Status.WAITING)
+                .build();
+        List<BookingDto> listsBookingDto = List.of(bookingDto);
+        Booking booking = Booking.builder()
+                .id(1L)
+                .start(LocalDateTime.now())
+                .end(LocalDateTime.now().plusDays(1L))
+                .item(item)
+                .booker(user)
+                .status(Status.WAITING)
+                .build();
+        List<Booking> listsBooking = List.of(booking);
+
+
+        when(itemRepository.findItemsByOwner(any())).thenReturn(listItems);
+
+        when(bookingRepository.getBookingsByItemIdInOrderByStartDesc(any(), any())).thenReturn(listsBooking);
+
+        List<BookingDto> listBookingDto = bookingServiceimpl.getAllBookingsAllItemsByUserId(owner, state, from, size);
+
+        verify(bookingRepository).getBookingsByItemIdInOrderByStartDesc(itemIdsArgumentCaptor.capture(), any());
+
+        List<Long> itemIds = itemIdsArgumentCaptor.getValue();
+        assertEquals(item.getId(), itemIds.get(0));
+
+        listsBookingDto = bookingServiceimpl.getAllBookingsAllItemsByUserId(owner, "WAITING", from, size);
+        assertTrue(listBookingDto.size() == 1);
+        listBookingDto = bookingServiceimpl.getAllBookingsAllItemsByUserId(owner, "REJECTED", from, size);
+        assertTrue(listBookingDto.size() == 0);
+        listBookingDto = bookingServiceimpl.getAllBookingsAllItemsByUserId(owner, "CURRENT", from, size);
+        assertTrue(listBookingDto.size() == 0);
+        listBookingDto = bookingServiceimpl.getAllBookingsAllItemsByUserId(owner, "PAST", from, size);
+        assertTrue(listBookingDto.size() == 0);
+        listBookingDto = bookingServiceimpl.getAllBookingsAllItemsByUserId(owner, "FUTURE", from, size);
+        assertTrue(listBookingDto.size() == 0);
+        listBookingDto = bookingServiceimpl.getAllBookingsAllItemsByUserId(owner, "ALL", from, size);
+        assertTrue(listBookingDto.size() == 1);
+
+        when(itemRepository.findItemsByOwner(any())).thenReturn(null);
+        assertThrows(NotFoundException.class, () -> bookingServiceimpl.getAllBookingsAllItemsByUserId(owner, state, from, size));
+
+
     }
 }
