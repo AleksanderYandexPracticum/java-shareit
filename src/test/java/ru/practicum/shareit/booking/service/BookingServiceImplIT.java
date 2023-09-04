@@ -8,6 +8,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.RequestBookingDto;
+import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.StatusException;
 import ru.practicum.shareit.exception.ValidationException;
@@ -113,11 +114,84 @@ class BookingServiceImplIT {
 
     @Test
     void update() {
+        UserDto userDto = new UserDto(null, "Jon", "jon@mail.ru");
+        UserDto returnUserDto = userServiceImpl.add(userDto);
+
+        UserDto userDto1 = new UserDto(null, "PegonJon", "pegonjon@mail.ru");
+        UserDto returnUserDto1 = userServiceImpl.add(userDto1);
+
+        ItemDto itemDto = ItemDto.builder()
+                .name("молоток")
+                .description("маленький")
+                .available(true)
+                .build();
+        itemServiceImpl.add(1L, itemDto);
+
+        ItemDto itemDto1 = ItemDto.builder()
+                .name("Кувалда")
+                .description("Большая")
+                .available(false)
+                .build();
+        itemServiceImpl.add(1L, itemDto1);
+
+
+        LocalDateTime start = LocalDateTime.now().plusDays(1L);
+        LocalDateTime end = LocalDateTime.now().plusDays(2L);
+
+        RequestBookingDto requestBookingDto = new RequestBookingDto(start, end, 1L);
+
+        BookingDto newBookingDto = bookingServiceImpl.add(2L, requestBookingDto, LocalDateTime.now());
+
+        BookingDto bookingDto = bookingServiceImpl.update(1L, 1L, true);
+
+        assertThat(bookingDto.getStart(), equalTo(requestBookingDto.getStart()));
+        assertThat(bookingDto.getEnd(), equalTo(requestBookingDto.getEnd()));
+        assertThat(bookingDto.getItem().getId(), equalTo(1L));
+        assertThat(bookingDto.getStatus(), equalTo(Status.APPROVED));
+
+        assertThrows(NotFoundException.class, () -> bookingServiceImpl.update(2L, 1L, false));
+        assertThrows(ValidationException.class, () -> bookingServiceImpl.update(1L, 1L, false));
+
     }
 
     @Test
     void getById() {
+        UserDto userDto = new UserDto(null, "Jon", "jon@mail.ru");
+        UserDto returnUserDto = userServiceImpl.add(userDto);
 
+        UserDto userDto1 = new UserDto(null, "PegonJon", "pegonjon@mail.ru");
+        UserDto returnUserDto1 = userServiceImpl.add(userDto1);
+
+        ItemDto itemDto = ItemDto.builder()
+                .name("молоток")
+                .description("маленький")
+                .available(true)
+                .build();
+        itemServiceImpl.add(1L, itemDto);
+
+        ItemDto itemDto1 = ItemDto.builder()
+                .name("Кувалда")
+                .description("Большая")
+                .available(false)
+                .build();
+        itemServiceImpl.add(1L, itemDto1);
+
+
+        LocalDateTime start = LocalDateTime.now().plusDays(1L);
+        LocalDateTime end = LocalDateTime.now().plusDays(2L);
+
+        RequestBookingDto requestBookingDto = new RequestBookingDto(start, end, 1L);
+
+        bookingServiceImpl.add(2L, requestBookingDto, LocalDateTime.now());
+
+        BookingDto bookingDto = bookingServiceImpl.getById(1L, 2L);
+
+        assertThat(bookingDto.getStart(), equalTo(requestBookingDto.getStart()));
+        assertThat(bookingDto.getEnd(), equalTo(requestBookingDto.getEnd()));
+        assertThat(bookingDto.getItem().getId(), equalTo(1L));
+
+        assertThrows(NotFoundException.class, () -> bookingServiceImpl.getById(3L, 2L));
+        assertThrows(NotFoundException.class, () -> bookingServiceImpl.getById(1L, 3L));
     }
 
     @Test
@@ -148,7 +222,7 @@ class BookingServiceImplIT {
 
         RequestBookingDto requestBookingDto = new RequestBookingDto(start, end, 1L);
 
-        BookingDto bDto = bookingServiceImpl.add(2L, requestBookingDto, LocalDateTime.now());
+        bookingServiceImpl.add(2L, requestBookingDto, LocalDateTime.now());
 
         List<BookingDto> list = bookingServiceImpl.getAllBookingsByUserId(
                 2L, "ALL", 0, 1);
