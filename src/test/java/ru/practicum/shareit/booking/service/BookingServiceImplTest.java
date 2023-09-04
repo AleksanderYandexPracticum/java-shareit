@@ -210,7 +210,7 @@ class BookingServiceImplTest {
         List<Booking> listsBooking = List.of(booking);
 
 
-        when(itemRepository.findItemsByOwner(any())).thenReturn(listItems);
+        when(userRepository.existsById(any())).thenReturn(true);
 
         when(userRepository.findUserById(any())).thenReturn(user);
 
@@ -234,9 +234,9 @@ class BookingServiceImplTest {
         listBookingDto = bookingServiceimpl.getAllBookingsByUserId(owner, "FUTURE", from, size);
         assertTrue(listBookingDto.size() == 0);
 
-        when(itemRepository.findItemsByOwner(any())).thenReturn(null);
+        when(userRepository.existsById(any())).thenReturn(false);
         assertThrows(NotFoundException.class, () -> bookingServiceimpl.getAllBookingsByUserId(owner, state, from, size));
-        when(itemRepository.findItemsByOwner(any())).thenReturn(listItems);
+        when(userRepository.existsById(any())).thenReturn(true);
         assertThrows(StatusException.class, () -> bookingServiceimpl.getAllBookingsByUserId(owner, "ERORR", from, size));
 
     }

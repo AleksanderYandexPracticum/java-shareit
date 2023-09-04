@@ -79,7 +79,8 @@ public class BookingServiceImpl implements BookingService {
     @Transactional(readOnly = true)
     @Override
     public List<BookingDto> getAllBookingsByUserId(Long owner, String state, Integer from, Integer size) {
-        validateIdOwnerHaveItem(owner);
+        //validateIdOwnerHaveItem(owner);
+        validateOwner(owner);
         validateState(state);
 
         List<BookingDto> bookingDto = new ArrayList<>();

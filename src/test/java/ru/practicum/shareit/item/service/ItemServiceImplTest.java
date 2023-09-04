@@ -137,19 +137,6 @@ class ItemServiceImplTest {
         when(itemRepository.existsById(anyLong())).thenReturn(true);
         when(itemRepository.getItemByIdAndOwner(id, owner)).thenReturn(null);
 
-//        BooleanExpression byItem = QBooking.booking.item.eq(any(Item.class));
-//        BooleanExpression startBefore = QBooking.booking.start.before(any(LocalDateTime.class));
-//        BooleanExpression endAfter = QBooking.booking.end.after(any(LocalDateTime.class));
-//        BooleanExpression endBefore = QBooking.booking.end.before(any(LocalDateTime.class));
-//        Sort sort = Sort.by(Sort.Direction.DESC, "end");
-//
-//        List<Booking> bookingsEnd = new ArrayList<>();
-//        List<Booking> bookingsStart = new ArrayList<>();
-//
-//        when(bookingRepository.findAll(byItem.and(startBefore).and(endAfter).or(byItem.and(endBefore)), any(Sort.class))).thenReturn(bookingsEnd);
-////        List<Status> status = Arrays.asList(Status.APPROVED, Status.CURRENT, Status.PAST);
-//        when(bookingRepository.findBookingsByItemAndStatusInAndStartAfterOrderByStartAsc(any(Item.class), any(), any(LocalDateTime.class))).thenReturn(bookingsStart);
-
 
         when(itemRepository.findItemById(anyLong())).thenReturn(item);
         List<Comment> comment = List.of();
@@ -221,8 +208,8 @@ class ItemServiceImplTest {
     void getAllItemToUser() {
         Long id = 2L;
         Long owner = 1L;
-        Integer from = 0;
-        Integer size = 1;
+        int from = 0;
+        int size = 1;
 
         Item item = Item.builder()
                 .id(id)

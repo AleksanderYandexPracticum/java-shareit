@@ -89,8 +89,8 @@ class ItemControllerTest {
 
     @Test
     void getAllItemtoUser() {
-        Integer from = 0;
-        Integer size = 1;
+        int from = 0;
+        int size = 1;
         Long owner = 1L;
 
         ItemDto itemDto = ItemDto.builder()
@@ -111,8 +111,8 @@ class ItemControllerTest {
 
     @Test
     void getAllItemWithText() {
-        Integer from = 0;
-        Integer size = 1;
+        int from = 0;
+        int size = 1;
         String text = "мол";
         Long owner = 1L;
 
