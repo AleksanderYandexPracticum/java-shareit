@@ -333,4 +333,13 @@ class BookingRepositoryIT {
         assertTrue(list.size() == 1);
         assertEquals(list.get(0), returnBooking2);
     }
+
+
+    @Test
+    void findBookingsByItemAndStartBeforeAndEndAfterOrItemAndEndBeforeOrderByEndDesc() {
+        List<Booking> list = bookingRepository.findBookingsByItemAndStartBeforeAndEndAfterOrItemAndEndBeforeOrderByEndDesc(
+                returnItem1, LocalDateTime.now().plusDays(1L), LocalDateTime.now().plusDays(1L), returnItem1, LocalDateTime.now().plusDays(1L));
+        assertTrue(list.size() == 1);
+        assertEquals(list.get(0), returnBooking1);
+    }
 }

@@ -1,16 +1,13 @@
 package ru.practicum.shareit.item.service;
 
-import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingNewNameIdDto;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.QBooking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -73,13 +70,14 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.getItemByIdAndOwner(id, owner);
         if (item != null) {
 
-            BooleanExpression byItem = QBooking.booking.item.eq(item);
-            BooleanExpression startBefore = QBooking.booking.start.before(time);
-            BooleanExpression endAfter = QBooking.booking.end.after(time);
-            BooleanExpression endBefore = QBooking.booking.end.before(time);
-            Sort sort = Sort.by(Sort.Direction.DESC, "end");
-
-            List<Booking> bookingsEnd = (List<Booking>) bookingRepository.findAll(byItem.and(startBefore).and(endAfter).or(byItem.and(endBefore)), sort);
+//            BooleanExpression byItem = QBooking.booking.item.eq(item);
+//            BooleanExpression startBefore = QBooking.booking.start.before(time);
+//            BooleanExpression endAfter = QBooking.booking.end.after(time);
+//            BooleanExpression endBefore = QBooking.booking.end.before(time);
+//            Sort sort = Sort.by(Sort.Direction.DESC, "end");
+//
+//            List<Booking> bookingsEnd = (List<Booking>) bookingRepository.findAll(byItem.and(startBefore).and(endAfter).or(byItem.and(endBefore)), sort);
+            List<Booking> bookingsEnd = bookingRepository.findBookingsByItemAndStartBeforeAndEndAfterOrItemAndEndBeforeOrderByEndDesc(item, time, time, item, time);
 
             List<Status> status = Arrays.asList(Status.APPROVED, Status.CURRENT, Status.PAST);
             List<Booking> bookingsStart = bookingRepository.findBookingsByItemAndStatusInAndStartAfterOrderByStartAsc(item, status, time);
