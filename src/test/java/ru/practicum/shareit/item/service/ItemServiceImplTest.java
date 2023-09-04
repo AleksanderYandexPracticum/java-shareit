@@ -11,7 +11,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.QBooking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
@@ -47,8 +46,6 @@ class ItemServiceImplTest {
     private BookingRepository bookingRepository;
     @Mock
     private CommentRepository commentRepository;
-    @Mock
-    private QBooking booking;
 
     @InjectMocks
     private ItemServiceImpl itemServiceImpl;
