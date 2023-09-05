@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-class ItemServiceImplIT {
+class ItemServiceImplIntegrationTest {
 
     private final EntityManager em;
     private final ItemServiceImpl itemServiceImpl;

@@ -2,7 +2,6 @@ package ru.practicum.shareit.booking;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -11,6 +10,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.StatusException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -18,6 +20,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -29,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @WebMvcTest(controllers = BookingController.class)
-class BookingControllerIT {
+class BookingControllerIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -63,7 +67,7 @@ class BookingControllerIT {
                 .getResponse()
                 .getContentAsString(StandardCharsets.UTF_8);
 
-        Assertions.assertEquals(objectMapper.writeValueAsString(bookingDto), result);
+        assertEquals(objectMapper.writeValueAsString(bookingDto), result);
 
     }
 
@@ -91,7 +95,7 @@ class BookingControllerIT {
                 .getResponse()
                 .getContentAsString(StandardCharsets.UTF_8);
 
-        Assertions.assertEquals(objectMapper.writeValueAsString(bookingDto), result);
+        assertEquals(objectMapper.writeValueAsString(bookingDto), result);
 
     }
 
@@ -176,6 +180,63 @@ class BookingControllerIT {
                 .andExpect(status().isOk());
 
         verify(bookingService).getAllBookingsAllItemsByUserId(owner, "All", from, size);
+    }
 
+    @SneakyThrows
+    @Test
+    void validateException() {
+        BookingDto bookingDto = BookingDto.builder()
+                .id(null)
+                .start(LocalDateTime.now())
+                .end(LocalDateTime.now().plusDays(1L))
+                .item(new Item())
+                .booker(new User())
+                .status(Status.WAITING)
+                .build();
+
+        when(bookingService.add(any(), any(), any())).thenThrow(new ValidationException("The item is not available for booking"));
+        mockMvc.perform(post("/bookings")
+                .header("X-Sharer-User-Id", 1L)
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(bookingDto)))
+                .andDo(print())
+                .andExpect(status().is(400))
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ValidationException))
+                .andExpect(result -> assertEquals("The item is not available for booking", result.getResolvedException().getMessage()));
+
+    }
+
+    @SneakyThrows
+    @Test
+    void validateNotFoundAndStatusException() {
+        BookingDto bookingDto = BookingDto.builder()
+                .id(null)
+                .start(LocalDateTime.now())
+                .end(LocalDateTime.now().plusDays(1L))
+                .item(new Item())
+                .booker(new User())
+                .status(Status.WAITING)
+                .build();
+
+        when(bookingService.add(any(), any(), any())).thenThrow(new NotFoundException("There is no such thing, it is not available for booking"));
+        mockMvc.perform(post("/bookings")
+                .header("X-Sharer-User-Id", 1L)
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(bookingDto)))
+                .andDo(print())
+                .andExpect(status().is(404))
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+                .andExpect(result -> assertEquals("There is no such thing, it is not available for booking", result.getResolvedException().getMessage()));
+
+        when(bookingService.getAllBookingsByUserId(any(), any(), any(), any())).thenThrow(new StatusException("Unknown state: UNSUPPORTED_STATUS"));
+        mockMvc.perform(get("/bookings")
+                .param("state", "All")
+                .param("from", "0")
+                .param("size", "1")
+                .header("X-Sharer-User-Id", 1L))
+                .andDo(print())
+                .andExpect(status().is(400))
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof StatusException))
+                .andExpect(result -> assertEquals("Unknown state: UNSUPPORTED_STATUS", result.getResolvedException().getMessage()));
     }
 }

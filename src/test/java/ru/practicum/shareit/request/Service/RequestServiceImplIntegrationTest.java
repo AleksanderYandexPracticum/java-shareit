@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-class RequestServiceImplIT {
+class RequestServiceImplIntegrationTest {
 
     private final EntityManager em;
     private final RequestServiceImpl requestServiceImpl;

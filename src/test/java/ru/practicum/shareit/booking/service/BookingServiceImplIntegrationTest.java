@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-class BookingServiceImplIT {
+class BookingServiceImplIntegrationTest {
 
     private final EntityManager em;
     private final BookingServiceImpl bookingServiceImpl;
@@ -265,6 +265,26 @@ class BookingServiceImplIT {
         list = bookingServiceImpl.getAllBookingsByUserId(
                 2L, "FUTURE", 0, 1);
         assertTrue(list.size() == 1);
+
+        list = bookingServiceImpl.getAllBookingsByUserId(
+                2L, "ALL", null, null);
+        assertTrue(list.size() == 1);
+        list = bookingServiceImpl.getAllBookingsByUserId(
+                2L, "WAITING", null, null);
+        assertTrue(list.size() == 1);
+        list = bookingServiceImpl.getAllBookingsByUserId(
+                2L, "REJECTED", null, null);
+        assertTrue(list.size() == 0);
+        list = bookingServiceImpl.getAllBookingsByUserId(
+                2L, "CURRENT", null, null);
+        assertTrue(list.size() == 0);
+        list = bookingServiceImpl.getAllBookingsByUserId(
+                2L, "PAST", null, null);
+        assertTrue(list.size() == 0);
+        list = bookingServiceImpl.getAllBookingsByUserId(
+                2L, "FUTURE", null, null);
+        assertTrue(list.size() == 1);
+
     }
 
     @Test
@@ -338,6 +358,25 @@ class BookingServiceImplIT {
         assertTrue(list.size() == 0);
         list = bookingServiceImpl.getAllBookingsAllItemsByUserId(
                 1L, "FUTURE", 0, 1);
+        assertTrue(list.size() == 1);
+
+        list = bookingServiceImpl.getAllBookingsAllItemsByUserId(
+                1L, "ALL", null, null);
+        assertTrue(list.size() == 1);
+        list = bookingServiceImpl.getAllBookingsAllItemsByUserId(
+                1L, "WAITING", null, null);
+        assertTrue(list.size() == 1);
+        list = bookingServiceImpl.getAllBookingsAllItemsByUserId(
+                1L, "REJECTED", null, null);
+        assertTrue(list.size() == 0);
+        list = bookingServiceImpl.getAllBookingsAllItemsByUserId(
+                1L, "CURRENT", null, null);
+        assertTrue(list.size() == 0);
+        list = bookingServiceImpl.getAllBookingsAllItemsByUserId(
+                1L, "PAST", null, null);
+        assertTrue(list.size() == 0);
+        list = bookingServiceImpl.getAllBookingsAllItemsByUserId(
+                1L, "FUTURE", null, null);
         assertTrue(list.size() == 1);
 
     }
