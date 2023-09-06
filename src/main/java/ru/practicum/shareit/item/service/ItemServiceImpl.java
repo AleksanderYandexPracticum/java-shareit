@@ -70,13 +70,6 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.getItemByIdAndOwner(id, owner);
         if (item != null) {
 
-//            BooleanExpression byItem = QBooking.booking.item.eq(item);
-//            BooleanExpression startBefore = QBooking.booking.start.before(time);
-//            BooleanExpression endAfter = QBooking.booking.end.after(time);
-//            BooleanExpression endBefore = QBooking.booking.end.before(time);
-//            Sort sort = Sort.by(Sort.Direction.DESC, "end");
-//
-//            List<Booking> bookingsEnd = (List<Booking>) bookingRepository.findAll(byItem.and(startBefore).and(endAfter).or(byItem.and(endBefore)), sort);
             List<Booking> bookingsEnd = bookingRepository.findBookingsByItemAndStartBeforeAndEndAfterOrItemAndEndBeforeOrderByEndDesc(item, time, time, item, time);
 
             List<Status> status = Arrays.asList(Status.APPROVED, Status.CURRENT, Status.PAST);

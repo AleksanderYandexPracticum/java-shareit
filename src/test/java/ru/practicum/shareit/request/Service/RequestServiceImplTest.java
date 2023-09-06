@@ -58,7 +58,6 @@ class RequestServiceImplTest {
         ItemRequestDto actualItemRequestDto = requestServiceImpl.add(owner, itemRequestDto, createdTime);
         Mockito.verify(requestRepository, Mockito.times(1)).save(itemRequest);
         assertEquals(actualItemRequestDto, itemRequestDto);
-
     }
 
     @Test

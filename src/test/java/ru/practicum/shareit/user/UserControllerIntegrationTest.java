@@ -10,11 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.shareit.exception.DuplicateEmailException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -114,6 +118,22 @@ class UserControllerIntegrationTest {
                 .andExpect(status().isOk());
 
         verify(userService).getAll();
+
+    }
+
+    @SneakyThrows
+    @Test
+    void validateException() {
+        UserDto userDto = new UserDto(null, "Jon", "Jon@mail.ru");
+
+        when(userService.add(any())).thenThrow(new DuplicateEmailException("Duplicate of the user's email address"));
+        mockMvc.perform(post("/users")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(userDto)))
+                .andDo(print())
+                .andExpect(status().is(500))
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof DuplicateEmailException))
+                .andExpect(result -> assertEquals("Duplicate of the user's email address", result.getResolvedException().getMessage()));
 
     }
 }

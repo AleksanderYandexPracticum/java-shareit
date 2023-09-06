@@ -29,18 +29,12 @@ class UserDtoTest {
     @Test
     public void testDeserialize() throws IOException {
 
-//        String jsonContent = "{\"firstname\":\"Mike\", \"lastname\": \"Meyer\"," +
-//                " \"dateofbirth\":\"15.05.1990\"," +
-//                " \"id\": 42, \"enabled\": true}";
         String jsonContent = "{\"name\": \"Jon\", \"email\":\"jon@mail.ru\"}";
 
         UserDto result = this.json.parse(jsonContent).getObject();
 
         assertThat(result.getName()).isEqualTo("Jon");
         assertThat(result.getEmail()).isEqualTo("jon@mail.ru");
-//        assertThat(result.getDateOfBirth()).isEqualTo(LocalDate.of(1990, 05, 15));
-//        assertThat(result.getId()).isEqualTo(42L);
-//        assertThat(result.isEnabled()).isEqualTo(true);
     }
 
 }

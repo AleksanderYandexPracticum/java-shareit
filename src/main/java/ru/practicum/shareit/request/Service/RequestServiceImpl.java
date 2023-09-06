@@ -43,7 +43,7 @@ public class RequestServiceImpl implements RequestService {
     @Transactional
     @Override
     public ItemRequestDto add(Long owner, ItemRequestDto itemRequestDto, LocalDateTime createdTime) {
-        validateWrongUser(owner);
+        validateUser(owner);
         validateEmptyDescription(itemRequestDto);
         ItemRequest itemRequest = RequestMapper.toItemRequest(owner, itemRequestDto, createdTime);
 
@@ -54,7 +54,7 @@ public class RequestServiceImpl implements RequestService {
     @Transactional(readOnly = true)
     @Override
     public List<ItemRequestDto> getYourRequestsWithResponse(Long owner) {
-        validateWrongUser(owner);
+        validateUser(owner);
         List<ItemRequest> listItemRequest = requestRepository.getItemRequestByRequestorOrderByCreatedDesc(owner);  // Получаю все запросы пользователя
 
         Map<Long, ItemRequestDto> mapItemRequestDto = getItemRequestDtoWithResponse(listItemRequest);
@@ -66,7 +66,6 @@ public class RequestServiceImpl implements RequestService {
     @Transactional(readOnly = true)
     @Override
     public List<ItemRequestDto> listOfRequestsFromOtherUsers(Long owner, Integer from, Integer size) {
-
 
         List<ItemRequest> page = null;
         if (from != null && size != null) {
@@ -88,7 +87,7 @@ public class RequestServiceImpl implements RequestService {
     @Transactional(readOnly = true)
     @Override
     public ItemRequestDto getRequestsWithResponse(Long owner, Long requestId) {
-        validateWrongUser(owner);
+        validateUser(owner);
         List<ItemRequest> listItemRequest = requestRepository.getItemRequestByIdOrderByCreatedDesc(requestId);
 
         if (listItemRequest.size() == 0) {
@@ -109,7 +108,7 @@ public class RequestServiceImpl implements RequestService {
         }
     }
 
-    private void validateWrongUser(Long owner) {
+    private void validateUser(Long owner) {
         if (!userRepository.existsById(owner)) {
             log.info("There is no such owner ID");
             throw new NotFoundException(String.format("There is no such owner ID № %s", owner));
@@ -128,23 +127,23 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private Map<Long, ItemRequestDto> getItemRequestDtoWithResponse(List<ItemRequest> itemRequests) {
-        List<Long> requestIds = itemRequests.stream()     // Достаю все Id запросов пользователя
+        List<Long> requestIds = itemRequests.stream()
                 .map((itemRequest) -> itemRequest.getId())
                 .collect(Collectors.toList());
 
-        List<Item> listItem = itemRepository.getItemsByRequestIdIn(requestIds);  // Получаю все (ответы) вещи для этих запросов
+        List<Item> listItem = itemRepository.getItemsByRequestIdIn(requestIds);
 
-        List<ItemDto> listItemDto = listItem.stream()   // Преобразую в DTO (ответы) вещи
+        List<ItemDto> listItemDto = listItem.stream()
                 .map(item -> ItemMapper.toItemDto(item))
                 .collect(Collectors.toList());
 
-        Map<Long, ItemRequest> mapItemRequest = itemRequests.stream()                 // делаю мапу с id запроса и самим запросом
+        Map<Long, ItemRequest> mapItemRequest = itemRequests.stream()
                 .collect(Collectors.toMap(ItemRequest::getId, itemRequest -> itemRequest));
 
-        Map<Long, ItemRequestDto> mapItemRequestDto = mapItemRequest.entrySet().stream()    // преобразую в маппе  запрос в DTO
+        Map<Long, ItemRequestDto> mapItemRequestDto = mapItemRequest.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> RequestMapper.toItemRequestDto(entry.getValue())));
 
-        for (Map.Entry<Long, ItemRequestDto> entry : mapItemRequestDto.entrySet()) {         //помещаю в  DTO запроса ответы (вещи)
+        for (Map.Entry<Long, ItemRequestDto> entry : mapItemRequestDto.entrySet()) {
             for (int i = 0; i < listItemDto.size(); i++) {
                 if (listItemDto.get(i).getRequestId().equals(entry.getKey())) {
                     entry.getValue().getItems().add(listItemDto.get(i));
