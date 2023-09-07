@@ -63,19 +63,23 @@ public class ItemController {
 
     @GetMapping
     public List<ItemAndLastAndNextBookingDto> getAllItemtoUser(HttpServletRequest request,
-                                                               @RequestHeader(OWNER_ID_HEADER) Long owner) {
+                                                               @RequestHeader(OWNER_ID_HEADER) Long owner,
+                                                               @RequestParam(required = false, value = "from") Integer from,
+                                                               @RequestParam(required = false, value = "size") Integer size) {
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return itemService.getAllItemtoUser(owner);
+        return itemService.getAllItemToUser(owner, from, size);
     }
 
     @GetMapping("/search")
     public List<ItemDto> getAllItemWithText(HttpServletRequest request,
                                             @RequestHeader(OWNER_ID_HEADER) Long owner,
-                                            @RequestParam(value = "text") String text) {
+                                            @RequestParam(value = "text") String text,
+                                            @RequestParam(required = false, value = "from") Integer from,
+                                            @RequestParam(required = false, value = "size") Integer size) {
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
-        return itemService.getAllItemWithText(text, owner);
+        return itemService.getAllItemWithText(text, owner, from, size);
     }
 
 

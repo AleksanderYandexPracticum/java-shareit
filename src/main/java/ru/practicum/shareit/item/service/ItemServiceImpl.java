@@ -1,14 +1,13 @@
 package ru.practicum.shareit.item.service;
 
-import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingNewNameIdDto;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.QBooking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -71,13 +70,7 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.getItemByIdAndOwner(id, owner);
         if (item != null) {
 
-            BooleanExpression byItem = QBooking.booking.item.eq(item);
-            BooleanExpression startBefore = QBooking.booking.start.before(time);
-            BooleanExpression endAfter = QBooking.booking.end.after(time);
-            BooleanExpression endBefore = QBooking.booking.end.before(time);
-            Sort sort = Sort.by(Sort.Direction.DESC, "end");
-
-            List<Booking> bookingsEnd = (List<Booking>) bookingRepository.findAll(byItem.and(startBefore).and(endAfter).or(byItem.and(endBefore)), sort);
+            List<Booking> bookingsEnd = bookingRepository.findBookingsByItemAndStartBeforeAndEndAfterOrItemAndEndBeforeOrderByEndDesc(item, time, time, item, time);
 
             List<Status> status = Arrays.asList(Status.APPROVED, Status.CURRENT, Status.PAST);
             List<Booking> bookingsStart = bookingRepository.findBookingsByItemAndStatusInAndStartAfterOrderByStartAsc(item, status, time);
@@ -123,19 +116,28 @@ public class ItemServiceImpl implements ItemService {
         upItem.setName((upItem.getName() == null || upItem.getName().isBlank()) ? oldItem.getName() : upItem.getName());
         upItem.setDescription((upItem.getDescription() == null || upItem.getName().isBlank()) ? oldItem.getDescription() : upItem.getDescription());
         upItem.setAvailable(upItem.getAvailable() == null ? oldItem.getAvailable() : upItem.getAvailable());
-        upItem.setRequest(upItem.getRequest() == null ? oldItem.getRequest() : upItem.getRequest());
+        upItem.setRequestId(upItem.getRequestId() == null ? oldItem.getRequestId() : upItem.getRequestId());
 
         return ItemMapper.toItemDto(itemRepository.save(upItem));
     }
 
     @Transactional()
     @Override
-    public List<ItemAndLastAndNextBookingDto> getAllItemtoUser(Long owner) {
+    public List<ItemAndLastAndNextBookingDto> getAllItemToUser(Long owner, Integer from, Integer size) {
         validateIdOwner(owner);
         List<ItemAndLastAndNextBookingDto> listBookings = new ArrayList<>();
         List<CommentCreatedStringDto> commentsCreatedStringDto = new ArrayList<>();
 
-        List<Item> items = itemRepository.findItemsByOwner(owner);
+        List<Item> items = null;
+
+        if (from != null && size != null) {
+            validateParametersPagination(from, size);
+            Integer pageNumber = from / size;
+            Pageable pageable = PageRequest.of(pageNumber, size);
+            items = itemRepository.findItemsByOwner(owner, pageable);
+        } else {
+            items = itemRepository.findItemsByOwner(owner);
+        }
 
         for (Item item : items) {
             LocalDateTime time = LocalDateTime.now();
@@ -173,16 +175,31 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ItemDto> getAllItemWithText(String text1, Long owner) {
+    public List<ItemDto> getAllItemWithText(String text1, Long owner, Integer from, Integer size) {
         validateIdOwner(owner);
         if (text1.isBlank() || text1.isEmpty()) {
             return new ArrayList<>();
         }
         String text2 = text1;
-        return itemRepository
-                .findAllByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(text1, text2).stream()
-                .map(item -> ItemMapper.toItemDto(item))
-                .collect(Collectors.toList());
+
+        List<ItemDto> allItem = null;
+
+        if (from != null && size != null) {
+            validateParametersPagination(from, size);
+            Integer pageNumber = from / size;
+            Pageable pageable = PageRequest.of(pageNumber, size);
+            allItem = itemRepository
+                    .findAllByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(text1, text2, pageable).stream()
+                    .map(item -> ItemMapper.toItemDto(item))
+                    .collect(Collectors.toList());
+        } else {
+            allItem = itemRepository
+                    .findAllByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(text1, text2).stream()
+                    .map(item -> ItemMapper.toItemDto(item))
+                    .collect(Collectors.toList());
+        }
+
+        return allItem;
     }
 
     @Transactional
@@ -259,6 +276,17 @@ public class ItemServiceImpl implements ItemService {
         if (commentDto.getText() == null || commentDto.getText().isBlank()) {
             log.info("The comment cannot be empty");
             throw new ValidationException("The comment cannot be empty");
+        }
+    }
+
+    private void validateParametersPagination(Integer from, Integer size) {
+        if (size == 0) {
+            log.info("The parameters page is wrong size=0");
+            throw new ValidationException("The parameters page is wrong size=0");
+        }
+        if ((from < 0 && size > 0) || (from >= 0 && size < 0) || (from < 0 && size < 0)) {
+            log.info("The parameters page is wrong");
+            throw new ValidationException("The parameters page is wrong from= " + from + ";   size= " + size);
         }
     }
 }

@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS items (
     description VARCHAR(10000)    NOT NULL,
     is_available  boolean         NOT NULL,
     owner_id    BIGINT            REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE,
-    request_id  BIGINT            REFERENCES requests (id)
+    request_id  BIGINT            REFERENCES requests (id) ON UPDATE CASCADE
 );
 
 

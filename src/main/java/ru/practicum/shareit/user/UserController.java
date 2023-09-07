@@ -43,14 +43,14 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public UserDto get(HttpServletRequest request, @PathVariable("userId") Long id) {
+    public UserDto getUser(HttpServletRequest request, @PathVariable("userId") Long id) {
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         return userService.get(id);
     }
 
     @DeleteMapping("/{userId}")
-    public void delete(HttpServletRequest request, @PathVariable("userId") Long id) {
+    public void deleteUser(HttpServletRequest request, @PathVariable("userId") Long id) {
         log.info("Request to the endpoint was received: '{} {}', string of request parameters: '{}'",
                 request.getMethod(), request.getRequestURI(), request.getQueryString());
         userService.delete(id);
