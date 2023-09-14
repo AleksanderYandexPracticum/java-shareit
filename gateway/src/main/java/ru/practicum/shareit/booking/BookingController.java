@@ -79,15 +79,4 @@ public class BookingController {
             throw new ValidationException("The time of booking is incorrectly indicated");
         }
     }
-
-//    private void validateParametersPagination(Integer from, Integer size) {
-//        if (size == 0) {
-//            log.info("The parameters page is wrong size=0");
-//            throw new ValidationException("The parameters page is wrong size=0");
-//        }
-//        if ((from < 0 && size > 0) || (from >= 0 && size < 0) || (from < 0 && size < 0)) {
-//            log.info("The parameters page is wrong");
-//            throw new ValidationException("The parameters page is wrong from= " + from + ";   size= " + size);
-//        }
-//    }
 }
