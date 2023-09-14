@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   gateway:
-    build: .
+    build: gateway/
     image: gateway
     container_name: container_gateway
     ports:
@@ -12,7 +12,7 @@ services:
       - SHAREIT_SERVER_URL=http://server:9090
 
   server:
-    build: .
+    build: server/
     image: server
     container_name: container_server
     ports:
@@ -25,10 +25,10 @@ services:
       - POSTGRES_PASSWORD=123
 
   db:
-    image: postgres:15-alpine
+    image: postgres:15.3
     container_name: container_postgres
-    volumes:
-      - /var/lib/postgresql/data/
+    #    volumes:
+    #      - /var/lib/postgresql/data/
     ports:
       - "6541:5432"
     environment:
