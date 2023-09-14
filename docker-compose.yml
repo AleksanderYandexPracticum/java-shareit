@@ -21,8 +21,11 @@ services:
       - db
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/shareit
+      - DB_NAME=shareit
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=123
+      - DB_HOST=db
+      - DB_PORT=5432
 
   db:
     image: postgres:15.3
