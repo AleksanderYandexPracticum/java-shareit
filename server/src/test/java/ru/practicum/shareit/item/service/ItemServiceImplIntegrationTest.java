@@ -74,27 +74,6 @@ class ItemServiceImplIntegrationTest {
         ItemAndLastAndNextBookingDto returnItemAndLastAndNextBookingDto = itemServiceImpl.get(1L, 1L);
         assertThat(returnItemAndLastAndNextBookingDto.getName(), equalTo(itemDto.getName()));
 
-//        ItemDto itemDto1 = ItemDto.builder()
-//                .name("")
-//                .description("маленький")
-//                .available(true)
-//                .build();
-//        assertThrows(ValidationException.class, () -> itemServiceImpl.add(1L, itemDto1));
-//
-//        ItemDto itemDto2 = ItemDto.builder()
-//                .name("Наковальня")
-//                .description("")
-//                .available(true)
-//                .build();
-//        assertThrows(ValidationException.class, () -> itemServiceImpl.add(1L, itemDto2));
-//
-//        ItemDto itemDto3 = ItemDto.builder()
-//                .name("Наковальня")
-//                .description("тяжёлая")
-//                .available(null)
-//                .build();
-//        assertThrows(ValidationException.class, () -> itemServiceImpl.add(1L, itemDto3));
-
     }
 
     @Test
@@ -175,8 +154,6 @@ class ItemServiceImplIntegrationTest {
         List<ItemAndLastAndNextBookingDto> list = itemServiceImpl.getAllItemToUser(1L, 0, 2);
         assertTrue(list.size() == 2);
         assertThrows(NotFoundException.class, () -> itemServiceImpl.getAllItemToUser(2L, 0, 2));
-//        assertThrows(ValidationException.class, () -> itemServiceImpl.getAllItemToUser(1L, -1, 2));
-//        assertThrows(ValidationException.class, () -> itemServiceImpl.getAllItemToUser(1L, 0, 0));
 
         list = itemServiceImpl.getAllItemToUser(1L, null, null);
         assertTrue(list.size() == 2);
@@ -202,8 +179,6 @@ class ItemServiceImplIntegrationTest {
         List<ItemDto> list = itemServiceImpl.getAllItemWithText("молот", 1L, 0, 2);
         assertTrue(list.size() == 1);
         assertThrows(NotFoundException.class, () -> itemServiceImpl.getAllItemToUser(2L, 0, 2));
-//        assertThrows(ValidationException.class, () -> itemServiceImpl.getAllItemToUser(1L, -1, 2));
-//        assertThrows(ValidationException.class, () -> itemServiceImpl.getAllItemToUser(1L, 0, 0));
 
         list = itemServiceImpl.getAllItemWithText("молот", 1L, null, null);
         assertTrue(list.size() == 1);

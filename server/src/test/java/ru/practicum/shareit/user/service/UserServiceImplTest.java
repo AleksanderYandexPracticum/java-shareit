@@ -43,14 +43,6 @@ class UserServiceImplTest {
         assertEquals(user.getEmail(), actualUserDto.getEmail());
         assertEquals(UserMapper.toUserDto(user), actualUserDto);
 
-//        UserDto user1 = new UserDto(null, null, "jon@mail.ru");
-//        assertThrows(ValidationException.class, () -> userServiceImp.add(user1));
-//
-//        UserDto user2 = new UserDto(null, "Jon", null);
-//        assertThrows(ValidationException.class, () -> userServiceImp.add(user2));
-//
-//        UserDto user3 = new UserDto(null, "Jon", "jonmail.ru");
-//        assertThrows(ValidationException.class, () -> userServiceImp.add(user3));
     }
 
     @Test
@@ -84,9 +76,6 @@ class UserServiceImplTest {
         assertEquals(user.getName(), actualUserDto.getName());
         assertEquals(user.getEmail(), actualUserDto.getEmail());
         assertEquals(UserMapper.toUserDto(user), actualUserDto);
-
-//        UserDto user1 = new UserDto(null, "Jon", "jonmail.ru");
-//        assertThrows(ValidationException.class, () -> userServiceImp.update(id, user1));
 
     }
 

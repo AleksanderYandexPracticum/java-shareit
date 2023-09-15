@@ -85,34 +85,6 @@ class ItemServiceImplTest {
         Assertions.assertEquals(item.getDescription(), actualItemDto.getDescription());
         Assertions.assertEquals(ItemMapper.toItemDto(item), actualItemDto);
 
-//        ItemDto itemDto1 = ItemDto.builder()
-//                .id(null)
-//                .name(null)
-//                .description("маленький")
-//                .available(true)
-//                .requestId(null)
-//                .build();
-
-//        Assertions.assertThrows(ValidationException.class, () -> itemServiceImpl.add(owner, itemDto1));
-
-//        ItemDto itemDto2 = ItemDto.builder()
-//                .id(null)
-//                .name("молоток")
-//                .description(null)
-//                .available(true)
-//                .requestId(null)
-//                .build();
-//        Assertions.assertThrows(ValidationException.class, () -> itemServiceImpl.add(owner, itemDto2));
-//
-//        ItemDto itemDto3 = ItemDto.builder()
-//                .id(null)
-//                .name("молоток")
-//                .description("маленький")
-//                .available(null)
-//                .requestId(null)
-//                .build();
-//        Assertions.assertThrows(ValidationException.class, () -> itemServiceImpl.add(owner, itemDto3));
-
         when(userRepository.existsById(anyLong())).thenReturn(false);
         Assertions.assertThrows(NotFoundException.class, () -> itemServiceImpl.add(owner, itemDto));
     }
@@ -332,8 +304,5 @@ class ItemServiceImplTest {
         Assertions.assertEquals(saveComment.getAuthor(), user);
 
         Assertions.assertEquals(comment.getText(), actualCommentDto.getText());
-
-//        commentDto.setText("");
-//        Assertions.assertThrows(ValidationException.class, () -> itemServiceImpl.addComment(owner, id, commentDto));
     }
 }

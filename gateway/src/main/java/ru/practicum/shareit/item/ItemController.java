@@ -3,6 +3,7 @@ package ru.practicum.shareit.item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -21,7 +21,7 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
 @Slf4j
-@RestController
+@Controller
 @RequiredArgsConstructor
 @RequestMapping("/items")
 @Validated
@@ -58,7 +58,6 @@ public class ItemController {
     public ResponseEntity<Object> getAllItemtoUser(@RequestHeader(OWNER_ID_HEADER) long userId,
                                                    @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
                                                    @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
-        validateParametersPagination(from, size);
         log.info("Get itemsToUser, userId={}, from={}, size={}", userId, from, size);
         return itemClient.getAllItemToUser(userId, from, size);
     }
@@ -68,7 +67,6 @@ public class ItemController {
                                                      @RequestParam(value = "text") String text,
                                                      @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
                                                      @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
-        validateParametersPagination(from, size);
         log.info("Get allItemWithText, userId={}, text={}, from={}, size={}", userId, text, from, size);
         return itemClient.getAllItemWithText(userId, text, from, size);
     }
@@ -97,17 +95,6 @@ public class ItemController {
         if (itemDto.getAvailable() == null) {
             log.info("The rental status cannot be empty");
             throw new ValidationException("The rental status cannot be empty");
-        }
-    }
-
-    private void validateParametersPagination(Integer from, Integer size) {
-        if (size == 0) {
-            log.info("The parameters page is wrong size=0");
-            throw new ValidationException("The parameters page is wrong size=0");
-        }
-        if ((from < 0 && size > 0) || (from >= 0 && size < 0) || (from < 0 && size < 0)) {
-            log.info("The parameters page is wrong");
-            throw new ValidationException("The parameters page is wrong from= " + from + ";   size= " + size);
         }
     }
 

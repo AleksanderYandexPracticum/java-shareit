@@ -81,33 +81,6 @@ class BookingServiceImplIntegrationTest {
 
         assertThrows(NotFoundException.class, () -> bookingServiceImpl.add(3L, requestBookingDto, LocalDateTime.now()));
 
-//        LocalDateTime start1 = null;
-//        LocalDateTime end1 = LocalDateTime.now().plusDays(2L);
-//        RequestBookingDto requestBookingDto3 = new RequestBookingDto(start1, end1, 1L);
-//        assertThrows(ValidationException.class, () -> bookingServiceImpl.add(2L, requestBookingDto3, LocalDateTime.now()));
-
-//        LocalDateTime start2 = LocalDateTime.now().plusDays(2L);
-//        LocalDateTime end2 = null;
-//        RequestBookingDto requestBookingDto4 = new RequestBookingDto(start2, end2, 1L);
-//        assertThrows(ValidationException.class, () -> bookingServiceImpl.add(2L, requestBookingDto4, LocalDateTime.now()));
-
-//        LocalDateTime start3 = LocalDateTime.now().plusDays(2L);
-//        LocalDateTime end3 = start3;
-//        RequestBookingDto requestBookingDto5 = new RequestBookingDto(start3, end3, 1L);
-//        assertThrows(ValidationException.class, () -> bookingServiceImpl.add(2L, requestBookingDto5, LocalDateTime.now()));
-//
-//        LocalDateTime start4 = LocalDateTime.now().plusDays(3L);
-//        LocalDateTime end4 = LocalDateTime.now().plusDays(2L);
-//        ;
-//        RequestBookingDto requestBookingDto6 = new RequestBookingDto(start4, end4, 1L);
-//        assertThrows(ValidationException.class, () -> bookingServiceImpl.add(2L, requestBookingDto6, LocalDateTime.now()));
-//
-//        LocalDateTime start5 = LocalDateTime.now().minusDays(1L);
-//        LocalDateTime end5 = LocalDateTime.now().plusDays(2L);
-//        ;
-//        RequestBookingDto requestBookingDto7 = new RequestBookingDto(start5, end5, 1L);
-//        assertThrows(ValidationException.class, () -> bookingServiceImpl.add(2L, requestBookingDto7, LocalDateTime.now()));
-
         assertThrows(NotFoundException.class, () -> bookingServiceImpl.add(1L, requestBookingDto, LocalDateTime.now()));
     }
 
@@ -233,18 +206,6 @@ class BookingServiceImplIntegrationTest {
         assertThrows(NotFoundException.class, () -> bookingServiceImpl.getAllBookingsByUserId(
                 3L, "ALL", 0, 1));
 
-//        assertThrows(StatusException.class, () -> bookingServiceImpl.getAllBookingsByUserId(
-//                1L, "ERRRORR", 0, 1));
-
-//        assertThrows(ValidationException.class, () -> bookingServiceImpl.getAllBookingsByUserId(
-//                1L, "ALL", 0, 0));
-//        assertThrows(ValidationException.class, () -> bookingServiceImpl.getAllBookingsByUserId(
-//                1L, "ALL", -1, 1));
-//        assertThrows(ValidationException.class, () -> bookingServiceImpl.getAllBookingsByUserId(
-//                1L, "ALL", 0, -1));
-//        assertThrows(ValidationException.class, () -> bookingServiceImpl.getAllBookingsByUserId(
-//                1L, "ALL", -1, -1));
-
 
         list = bookingServiceImpl.getAllBookingsByUserId(
                 2L, "ALL", 0, 1);
@@ -326,18 +287,6 @@ class BookingServiceImplIntegrationTest {
 
         assertThrows(NotFoundException.class, () -> bookingServiceImpl.getAllBookingsAllItemsByUserId(
                 3L, "ALL", 0, 1));
-
-//        assertThrows(StatusException.class, () -> bookingServiceImpl.getAllBookingsAllItemsByUserId(
-//                1L, "ERRRORR", 0, 1));
-//
-//        assertThrows(ValidationException.class, () -> bookingServiceImpl.getAllBookingsAllItemsByUserId(
-//                1L, "ALL", 0, 0));
-//        assertThrows(ValidationException.class, () -> bookingServiceImpl.getAllBookingsAllItemsByUserId(
-//                1L, "ALL", -1, 1));
-//        assertThrows(ValidationException.class, () -> bookingServiceImpl.getAllBookingsAllItemsByUserId(
-//                1L, "ALL", 0, -1));
-//        assertThrows(ValidationException.class, () -> bookingServiceImpl.getAllBookingsAllItemsByUserId(
-//                1L, "ALL", -1, -1));
 
 
         list = bookingServiceImpl.getAllBookingsAllItemsByUserId(

@@ -42,15 +42,6 @@ class UserServiceImplIntegrationTest {
         assertThat(user.getName(), equalTo(userDto.getName()));
         assertThat(user.getEmail(), equalTo(userDto.getEmail()));
 
-//        UserDto user1 = new UserDto(null, null, "jon@mail.ru");
-//        assertThrows(ValidationException.class, () -> userServiceImpl.add(user1));
-//
-//        UserDto user2 = new UserDto(null, "Jon", null);
-//        assertThrows(ValidationException.class, () -> userServiceImpl.add(user2));
-//
-//        UserDto user3 = new UserDto(null, "Jon", "jonmail.ru");
-//        assertThrows(ValidationException.class, () -> userServiceImpl.add(user3));
-
         assertThrows(DuplicateEmailException.class, () -> userServiceImpl.add(userDto));
 
     }
@@ -84,9 +75,6 @@ class UserServiceImplIntegrationTest {
         UserDto userDto3 = new UserDto(null, null, "jonNEW@mail.ru");
         returnUserDto = userServiceImpl.update(1L, userDto3);
         assertThat(returnUserDto.getEmail(), equalTo(userDto3.getEmail()));
-
-//        UserDto userDto5 = new UserDto(null, null, "jonNEWmail.ru");
-//        assertThrows(ValidationException.class, () -> userServiceImpl.update(1L, userDto5));
     }
 
     @Test

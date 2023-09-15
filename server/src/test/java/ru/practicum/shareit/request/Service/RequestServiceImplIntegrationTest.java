@@ -55,15 +55,7 @@ class RequestServiceImplIntegrationTest {
         assertThat(itemRequest.getId(), notNullValue());
         assertThat(itemRequest.getDescription(), equalTo(itemRequestDto.getDescription()));
 
-//        assertThrows(ValidationException.class, () -> requestServiceImpl.listOfRequestsFromOtherUsers(1L, -1, 1));
-
         assertThrows(NotFoundException.class, () -> requestServiceImpl.add(2L, itemRequestDto, LocalDateTime.now()));
-//        ItemRequestDto itemRequestDto1 = ItemRequestDto.builder()
-//                .description("")
-//                .items(new ArrayList<>())
-//                .build();
-//        assertThrows(ValidationException.class, () -> requestServiceImpl.add(1L, itemRequestDto1, LocalDateTime.now()));
-
 
     }
 
@@ -106,8 +98,6 @@ class RequestServiceImplIntegrationTest {
         ItemRequest itemRequest = query.setParameter("description", itemRequestDto.getDescription()).getSingleResult();
         assertThat(itemRequest.getId(), notNullValue());
         assertThat(itemRequest.getDescription(), equalTo(itemRequestDto.getDescription()));
-
-//        assertThrows(ValidationException.class, () -> requestServiceImpl.listOfRequestsFromOtherUsers(1L, -1, 1));
 
         List<ItemRequestDto> list = requestServiceImpl.listOfRequestsFromOtherUsers(2L, 0, 1);
         assertThat(list.get(0).getDescription(), equalTo(itemRequestDto.getDescription()));

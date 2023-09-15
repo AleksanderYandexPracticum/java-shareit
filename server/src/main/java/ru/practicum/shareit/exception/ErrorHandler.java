@@ -26,7 +26,7 @@ public class ErrorHandler {
         return new ErrorResponse("There is a duplicate Email", e.getMessage());
     }
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(Throwable.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)  //если возникло исключение.
     public ErrorResponse handleThrowable(final Throwable e) {
         return new ErrorResponse("An exception has occurred", e.getMessage());
